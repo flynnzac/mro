@@ -15,15 +15,15 @@ guile_lib = guile-2.2
 
 .FORCE:
 mro: .FORCE mro.c
-	cc -I $(guile_include) -l$(guile_lib) -o mro -DMAXBUFFER=$(buffer) \
+	cc -I $(guile_include) mro.c -l$(guile_lib) -o mro -DMAXBUFFER=$(buffer) \
 	-DMAXSTACK=$(stack) -DMAXMACROS=$(macros) -DMAXNOPRINT=$(noprint) \
 	-DDEFINE=$(define)  -DCOMMENT_START=$(comment_start) \
 	-DCOMMENT_END=$(comment_end) -DPUSH=$(push) -DPUSH2=$(push2) \
-	-DREF=$(ref) -DCODE=$(code) -Wall mro.c
+	-DREF=$(ref) -DCODE=$(code) -Wall 
 
 
 doc: README.mro
-	cat README.mro | ./mro > README.md
+	cat README.mro.html | mro > README.html
 
 install: mro
 	cp mro /usr/local/bin/
