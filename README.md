@@ -9,9 +9,9 @@ All of the program's commands are single characters.  These characters can be ch
 
 - `#` is the default PUSH command.  It sets the buffer that the text is written to be the next level up.  For example, in the text
 
-` the quick brown fox # runs `
+    ` the quick brown fox # runs `
 
-"the quick brown fox" is written out and " runs" is written to the next buffer up
+    "the quick brown fox" is written out and " runs" is written to the next buffer up
 
-- @ takes the
+- `@` takes the
 
