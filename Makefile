@@ -10,10 +10,12 @@ comment_end="'\\n'"
 push = "'\#'"
 push2 = "'='"
 ref = "'~'"
+guile_include = /usr/include/guile/2.2
+guile_lib = guile-2.2
 
 .FORCE:
 mro: .FORCE mro.c
-	cc -I /usr/include/guile/2.2 -lguile-2.2 -o mro -DMAXBUFFER=$(buffer) \
+	cc -I $(guile_include) -l$(guile_lib) -o mro -DMAXBUFFER=$(buffer) \
 	-DMAXSTACK=$(stack) -DMAXMACROS=$(macros) -DMAXNOPRINT=$(noprint) \
 	-DDEFINE=$(define)  -DCOMMENT_START=$(comment_start) \
 	-DCOMMENT_END=$(comment_end) -DPUSH=$(push) -DPUSH2=$(push2) \
