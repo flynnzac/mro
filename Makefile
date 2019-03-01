@@ -1,4 +1,4 @@
-buffer=100
+buffer=10000
 stack=10
 macros=100
 noprint=100

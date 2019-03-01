@@ -83,7 +83,7 @@ void
 output (int c)
 {
   if (check_dnp(c))
-      return;
+    return;
 
   
   if (stack.n_buf == 0)
@@ -148,71 +148,18 @@ look_up_name (const struct buffer name)
   return -1;
 }
 
-/* guile: add to do not print list */
-
-SCM
-guile_add_to_dnp (SCM ch)
+void
+expand_macros (FILE* f)
 {
-  char* str = scm_to_locale_string(ch);
-  add_to_dnp(str[0]);
-  free(str);
-  return scm_from_locale_string("");
-}
-
-/* guile: clear do not print list */
-
-SCM
-guile_printall ()
-{
-  dnp = realloc(dnp, sizeof(char));
-  dnp[0] = '\0';
-  n_dnp = 1;
-
-  return scm_from_locale_string("");
-}
-
-/* guile: start a definition section by adding \n and ' ' to do not print
-   list */
-
-SCM
-guile_defsec ()
-{
-  add_to_dnp('\n');
-  return scm_from_locale_string("");
-}
-
-void*
-register_guile_functions (void* data)
-{
-  scm_c_define_gsubr("add-to-dnp", 1, 0, 0, &guile_add_to_dnp);
-  scm_c_define_gsubr("printall", 0, 0, 0, &guile_printall);
-  scm_c_define_gsubr("defsec", 0, 0, 0, &guile_defsec);
-
-  return NULL;
-}
-  
-
-/* main program */
-int
-main (int argc, char** argv)
-{
-
   int c;
   int loc;
   int i;
   struct buffer* buf;
   char* guile_str;
   SCM guile_ret;
-  
-  stack.n_buf = 0;
 
-  dnp = malloc(sizeof(char));
-  dnp[0] = '\0';
-  n_dnp = 1;
 
-  scm_with_guile(&register_guile_functions, NULL);
-
-  while ((c = getc(stdin)) != EOF)
+  while ((c = fgetc(f)) != EOF)
     {
       if (inquote)
         {
@@ -231,7 +178,7 @@ main (int argc, char** argv)
           switch (c)
             {
             case PUSH2:
-              if (stack.n_buf == 0)
+              if (stack.n_buf != 1)
                 {
                   output(c);
                   break;
@@ -244,9 +191,9 @@ main (int argc, char** argv)
               break;
             case DEFINE:
               if (stack.n_buf >= 2)
-                  push_macro();
+                push_macro();
               else
-                  output(c);
+                output(c);
               break;
             case REF:
               if (stack.n_buf >= 1)
@@ -297,6 +244,84 @@ main (int argc, char** argv)
         }
 
     }
+
+  
+}
+
+
+/* guile: add to do not print list */
+
+SCM
+guile_add_to_dnp (SCM ch)
+{
+  char* str = scm_to_locale_string(ch);
+  add_to_dnp(str[0]);
+  free(str);
+  return scm_from_locale_string("");
+}
+
+/* guile: clear do not print list */
+
+SCM
+guile_printall ()
+{
+  dnp = realloc(dnp, sizeof(char));
+  dnp[0] = '\0';
+  n_dnp = 1;
+
+  return scm_from_locale_string("");
+}
+
+/* guile: start a definition section by adding \n and ' ' to do not print
+   list */
+
+SCM
+guile_defsec ()
+{
+  add_to_dnp('\n');
+  return scm_from_locale_string("");
+}
+
+/* guile: source a macro file as if it was entered along with text */
+
+SCM
+guile_source (SCM file)
+{
+  char* file_c = scm_to_locale_string(file);
+  FILE* f = fopen(file_c, "r");
+  expand_macros(f);
+  fclose(f);
+  free(file_c);
+  return scm_from_locale_string("");
+}
+
+void*
+register_guile_functions (void* data)
+{
+  scm_c_define_gsubr("add-to-dnp", 1, 0, 0, &guile_add_to_dnp);
+  scm_c_define_gsubr("printall", 0, 0, 0, &guile_printall);
+  scm_c_define_gsubr("defsec", 0, 0, 0, &guile_defsec);
+
+  scm_c_define_gsubr("source", 1, 0, 0, &guile_source);
+
+  return NULL;
+}
+
+
+/* main program */
+int
+main (int argc, char** argv)
+{
+  
+  stack.n_buf = 0;
+
+  dnp = malloc(sizeof(char));
+  dnp[0] = '\0';
+  n_dnp = 1;
+
+  scm_with_guile(&register_guile_functions, NULL);
+
+  expand_macros(stdin);
 
   free_macro_table();
   return 0;
