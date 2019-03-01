@@ -173,9 +173,9 @@ expand_macros (FILE* f)
   struct buffer* buf;
   char* guile_str;
   SCM guile_ret;
+  FILE* f2;
 
-
-  while ((c = fgetc(f)) != EOF)
+  while (((c = fgetc(f)) != EOF) && c != '\0')
     {
       if (inquote)
         {
@@ -247,6 +247,18 @@ expand_macros (FILE* f)
                     }
                 }
               break;
+	    case EXPAND:
+	      if (stack.n_buf >= 1)
+		{
+		  buf = pop_buffer_stack();
+		  null_terminate(buf);
+		  f2 = fmemopen(buf->text, MAXBUFFER, "r");
+		  expand_macros(f2);
+		  fclose(f2);
+		}
+	      else
+		output(c);
+	      break;
             case '`':
               inquote = 1;
               break;
@@ -328,7 +340,7 @@ register_guile_functions (void* data)
 int
 main (int argc, char** argv)
 {
-  
+
   stack.n_buf = 0;
 
   dnp = malloc(sizeof(char));

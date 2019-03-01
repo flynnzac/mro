@@ -1,7 +1,7 @@
 <h1>mro</h1>
 stack-based macro processor extensible with guile
 
-<p>The mro program processes macros.  It can also execute Guile Scheme code and insert the value that code returns into the text. The <code>mro</code> program is based on a simple stack-based macro language.  It has six basic commands and is less than 300 lines of code.</p>
+<p>The mro program processes macros.  It can also execute Guile Scheme code and insert the value that code returns into the text. The <code>mro</code> program is based on a simple stack-based macro language.  It has seven basic commands and is less than 300 lines of code.</p>
 
 <p>All of the program's commands are single characters.  The default command characters are well-suited to producing Tex files and HTML files which is mostly what I use the program for.  These characters can be changed by providing options to the <code>make</code> command.</p>
 
@@ -38,6 +38,12 @@ stack-based macro processor extensible with guile
 <p><code>#(+ 1 2);</code>
 
 <p>would print "3" to the buffer below it.
+  
+<li>  expands the macros in the top of the stock if there is anything on the stack.  For example,
+    
+<p><code>#code=number`#i~'</code>
+<p><code>#i=1@</code>
+<p><code>##code~$</code>  
 </ul>
 
 <h2>Use Cases</h2>

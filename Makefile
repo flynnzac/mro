@@ -10,6 +10,7 @@ comment_end="'\\n'"
 push = "'\#'"
 push2 = "'='"
 ref = "'~'"
+expand = 36
 guile_include = /usr/include/guile/2.2
 guile_lib = guile-2.2
 
@@ -19,7 +20,7 @@ mro: .FORCE mro.c
 	-DMAXSTACK=$(stack) -DMAXMACROS=$(macros) -DMAXNOPRINT=$(noprint) \
 	-DDEFINE=$(define)  -DCOMMENT_START=$(comment_start) \
 	-DCOMMENT_END=$(comment_end) -DPUSH=$(push) -DPUSH2=$(push2) \
-	-DREF=$(ref) -DCODE=$(code) -Wall 
+	-DREF=$(ref) -DCODE=$(code) -DEXPAND=$(expand)  -Wall 
 
 
 doc: README.mro.html
