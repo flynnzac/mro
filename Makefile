@@ -22,7 +22,7 @@ mro: .FORCE mro.c
 	-DREF=$(ref) -DCODE=$(code) -Wall 
 
 
-doc: README.mro
+doc: README.mro.html
 	cat README.mro.html | mro > README.html
 
 install: mro
