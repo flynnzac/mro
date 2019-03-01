@@ -352,6 +352,7 @@ main (int argc, char** argv)
   expand_macros(stdin);
 
   free_macro_table();
+  free(dnp);
   return 0;
 
 }
