@@ -20,3 +20,5 @@ mro: .FORCE mro.c
 	-DREF=$(ref) -DCODE=$(code) -Wall mro.c
 
 
+doc: README.mro
+	cat README.mro | ./mro > README.md
