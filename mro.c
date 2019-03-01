@@ -10,7 +10,17 @@
    reference: ~
    quote text without parsing: `TEXT'
    comment a line: %
-   execute guile scheme code: <
+   execute (guile scheme) code: ;
+
+   define takes top two elements from stack, assigns the value of the top
+   element to the name given by the second top element
+
+   reference takes top element of stack, looks up the macro name and pushes the
+   resulting text to the next buffer down on the stack
+
+   execute executes the top of the stack as guile scheme code.  If the code
+   returns something that can be a string and pushes it on to the next level of
+   the stack.
 */
 
 /* parser state */
