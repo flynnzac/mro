@@ -39,11 +39,15 @@ stack-based macro processor extensible with guile
 
 <p>would print "3" to the buffer below it.
   
-<li>  expands the macros in the top of the stock if there is anything on the stack.  For example,
+<li> $ expands the macros in the top of the stock if there is anything on the stack.  For example,
     
-<p><code>#code=number`#i~'</code>
+<p><code>#code=number`#i~'@</code>
 <p><code>#i=1@</code>
-<p><code>##code~$</code>  
+<p><code>##code~$</code>
+<p><code>#i=2@</code>
+<p><code>##code~$</code>
+
+<p> Would print out two lines.  The first would be "number1" and the second would be "number2".
 </ul>
 
 <h2>Use Cases</h2>
