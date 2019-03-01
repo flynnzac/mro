@@ -35,3 +35,14 @@ All of the program's commands are single characters.  The defaults are well-suit
 
     would print "3" out.
 
+# Use Cases
+
+mro can be used for the sorts of problem that m4 is used for, but it is much simpler.  I often use it in papers where there are a few parameters of interest that I save to some output files.  To prevent copying errors, I do something like (usually in a separate file "parameters.mro"):
+
+`#rho=#(... code to fetch rho parameter);@`
+
+I can then run:
+
+`cat parameters.mro paper.tex | mro > final_paper.tex`
+
+Where I use `#rho~` in the paper.tex file.

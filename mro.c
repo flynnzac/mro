@@ -3,26 +3,6 @@
 #include <string.h>
 #include <libguile.h>
 
-/* 
-   macro language defaults:
-   push: #
-   define: @
-   reference: ~
-   quote text without parsing: `TEXT'
-   comment a line: %
-   execute (guile scheme) code: ;
-
-   define takes top two elements from stack, assigns the value of the top
-   element to the name given by the second top element
-
-   reference takes top element of stack, looks up the macro name and pushes the
-   resulting text to the next buffer down on the stack
-
-   execute executes the top of the stack as guile scheme code.  If the code
-   returns something that can be a string and pushes it on to the next level of
-   the stack.
-*/
-
 /* parser state */
 static int inquote = 0;
 static int incomment = 0;
@@ -64,7 +44,7 @@ check_dnp (int c)
   return 0;
 }
 
-/* manipulate stack */
+/* pops buffer off stack */
 
 struct buffer*
 pop_buffer_stack ()
@@ -73,7 +53,7 @@ pop_buffer_stack ()
   return &stack.buf[stack.n_buf];
 }
 
-/* write to and from buffers */
+/* writes character to buffer */
 
 void
 push_to_buffer (struct buffer* b, int c)
@@ -81,6 +61,8 @@ push_to_buffer (struct buffer* b, int c)
   b->text[b->location] = c;
   b->location = b->location + 1;
 }
+
+/* copy buffer to string */
 
 void
 copy_from_buffer (struct buffer* src, char** dest)
@@ -94,6 +76,8 @@ copy_from_buffer (struct buffer* src, char** dest)
     }
   (*dest)[src->location] = '\0';
 }
+
+/* pushes text to buffer or screen */
 
 void
 output (int c)
@@ -112,6 +96,8 @@ output (int c)
     }
 }
 
+/* null terminate a buffer */
+
 void
 null_terminate (struct buffer* b)
 {
@@ -119,7 +105,7 @@ null_terminate (struct buffer* b)
 }
 
 
-/* clean up functions */
+/* clean up macro table */
 
 void
 free_macro_table ()
@@ -132,7 +118,7 @@ free_macro_table ()
     }
 }
 
-/* macro manipulation */
+/* add macro given top two elements in buffer */
 void
 push_macro ()
 
@@ -147,6 +133,7 @@ push_macro ()
   
 }
 
+/* look up macro name */
 int
 look_up_name (const struct buffer name)
 {
@@ -161,7 +148,7 @@ look_up_name (const struct buffer name)
   return -1;
 }
 
-/* guile integration */
+/* guile: add to do not print list */
 
 SCM
 guile_add_to_dnp (SCM ch)
@@ -171,6 +158,8 @@ guile_add_to_dnp (SCM ch)
   free(str);
   return scm_from_locale_string("");
 }
+
+/* guile: clear do not print list */
 
 SCM
 guile_printall ()
@@ -182,11 +171,13 @@ guile_printall ()
   return scm_from_locale_string("");
 }
 
+/* guile: start a definition section by adding \n and ' ' to do not print
+   list */
+
 SCM
 guile_defsec ()
 {
   add_to_dnp('\n');
-  add_to_dnp(' ');
   return scm_from_locale_string("");
 }
 
