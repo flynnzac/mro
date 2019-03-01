@@ -7,7 +7,7 @@ The macro program is based on a stack structure.  It has very few commands and i
 
 All of the program's commands are single characters.  These characters can be changed by providing options to the `make' command. It has the following commands (all of the characters can be changed from these :
 
-- # is the default PUSH command.  It sets the buffer that the text is written to be the next level up.  For example, in the text
+- `#` is the default PUSH command.  It sets the buffer that the text is written to be the next level up.  For example, in the text
 
 ` the quick brown fox # runs `
 
