@@ -118,21 +118,6 @@ free_macro_table ()
     }
 }
 
-/* add macro given top two elements in buffer */
-void
-push_macro ()
-
-{
-  struct buffer* value = pop_buffer_stack();
-  struct buffer* name = pop_buffer_stack();
-  
-  copy_from_buffer(name, &(macro_table[n_macros].name));
-  copy_from_buffer(value, &(macro_table[n_macros].value));
-
-  n_macros++;
-  
-}
-
 /* look up macro name */
 int
 look_up_name (const struct buffer name)
@@ -147,6 +132,37 @@ look_up_name (const struct buffer name)
     }
   return -1;
 }
+
+
+/* add macro given top two elements in buffer */
+void
+push_macro ()
+
+{
+  int loc;
+  
+  struct buffer* value = pop_buffer_stack();
+  struct buffer* name = pop_buffer_stack();
+
+  null_terminate(value);
+  null_terminate(name);
+
+  loc = look_up_name(*name);
+
+  if (loc < 0)
+    {
+      copy_from_buffer(name, &(macro_table[n_macros].name));
+      copy_from_buffer(value, &(macro_table[n_macros].value));
+      n_macros++;
+    }
+  else
+    {
+      free(macro_table[loc].value);
+      copy_from_buffer(value, &(macro_table[loc].value));
+    }
+  
+}
+
 
 void
 expand_macros (FILE* f)
