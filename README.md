@@ -3,7 +3,7 @@ stack-based macro processor extensible with guile
 
 The mro program processes macros.  It can also execute Guile Scheme code and use the values it returns in the text. The `mro` program is based on a simple stack-based macro language.  It has six commands and is less than 300 lines of code.
 
-All of the program's commands are single characters.  The defaults are well-suited to producing Tex files which is mostly what I use the program for.  These characters can be changed by providing options to the `make` command. `mro` has the following commands:
+All of the program's commands are single characters.  These characters can be changed by providing options to the `make` command. `mro` has the following commands:
 
 - `#` is the default PUSH command.  It sets the buffer that the text is written to be the next level up.  For example, in the text
 
