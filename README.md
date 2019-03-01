@@ -12,23 +12,23 @@ stack-based macro processor extensible with guile
 <ul>
 <li> # is the default PUSH command.  It sets the buffer that the text is written to be the next level up.  For example, in the text
 
-    <p><code>the quick brown fox # runs </code>
+<p><code>the quick brown fox # runs </code>
 
-    <p>"the quick brown fox" is written out and " runs" is written to the next buffer up
+<p>"the quick brown fox" is written out and " runs" is written to the next buffer up
 
 <li> = is the default PUSH2 command.  It can be used to PUSH if there is exactly one layer to the stack (i.e. it can be used if one and only PUSH command has been used before). Otherwise, it is treated like normal text.  It never has to be used, but it can make macro definitions more readable.
 
 <li> @ is the default DEFINE command.  It pops the top two buffers and binds the value in the top buffer to the name in the second from the top buffer. Like so:
 
-    <p><code>#username=flynnzac@</code>
+<p><code>#username=flynnzac@</code>
 
-    <p>defines the macro "username" and binds the value "flynnzac" to it.
+<p>defines the macro "username" and binds the value "flynnzac" to it.
 
 <li> ~ is the default REFERENCE command.  It pops the top element on the stack, reads it, and looks up the macro. It then replaces the text on the next lowest buffer in the stack with the macro's value.  Like so:
 
-     <p><code>#username~</code>
+<p><code>#username~</code>
 
-    <p>prints the value of the macro `username` (from above: "flynnzac").
+<p>prints the value of the macro `username` (from above: "flynnzac").
     
 <li> `TEXT' quotes TEXT and prints it literally, no matter what it contains.  It is the way to escape special characters.
 
@@ -36,9 +36,9 @@ stack-based macro processor extensible with guile
 
 <li> ; executes the Guile Scheme on the top of the stack.  For example,
 
-    <p><code>#(+ 1 2);</code>
+<p><code>#(+ 1 2);</code>
 
-    <p>would print "3" to the buffer below it.
+<p>would print "3" to the buffer below it.
 </ul>
 
 <h2>Use Cases</h2>
