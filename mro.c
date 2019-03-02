@@ -9,7 +9,7 @@ static int incomment = 0;
 
 
 /* buffer stack */
-struct buffer { char text[MAXBUFFER]; int location; };
+struct buffer { char* text; int location; int size; };
 struct buffer_stack { struct buffer buf[MAXSTACK]; int n_buf;  };
 
 struct buffer_stack stack;
@@ -58,8 +58,24 @@ pop_buffer_stack ()
 void
 push_to_buffer (struct buffer* b, int c)
 {
+  if (b->size <= b->location)
+    {
+      b->text = realloc(b->text,
+                        sizeof(char)*(b->size + PAGE));
+      b->size = b->size + PAGE;
+    }
+  
   b->text[b->location] = c;
   b->location = b->location + 1;
+}
+
+/* init buffer */
+void
+init_buffer (struct buffer* b)
+{
+  b->text = malloc(sizeof(char)*PAGE);
+  b->size = PAGE;
+  b->location = 0;
 }
 
 /* copy buffer to string */
@@ -101,9 +117,9 @@ output (int c)
 void
 null_terminate (struct buffer* b)
 {
-  b->text[b->location] = '\0';
+  push_to_buffer(b, '\0');
+  b->location--;
 }
-
 
 /* clean up macro table */
 
@@ -252,7 +268,7 @@ expand_macros (FILE* f)
                 {
                   buf = pop_buffer_stack();
                   null_terminate(buf);
-                  f2 = fmemopen(buf->text, MAXBUFFER, "r");
+                  f2 = fmemopen(buf->text, buf->size, "r");
                   expand_macros(f2);
                   fclose(f2);
                 }
@@ -341,7 +357,10 @@ int
 main (int argc, char** argv)
 {
 
+  int i;
   stack.n_buf = 0;
+  for (i=0; i < MAXSTACK; i++)
+    init_buffer(stack.buf+i);
 
   dnp = malloc(sizeof(char));
   dnp[0] = '\0';
