@@ -134,6 +134,17 @@ free_macro_table ()
     }
 }
 
+/* clean up stack */
+void
+free_stack ()
+{
+  int i;
+  for (i=0; i < MAXSTACK; i++)
+    {
+      free(stack.buf[i].text);
+    }
+}
+
 /* look up macro name */
 int
 look_up_name (const struct buffer name)
@@ -370,6 +381,7 @@ main (int argc, char** argv)
 
   expand_macros(stdin);
 
+  free_stack();
   free_macro_table();
   free(dnp);
   return 0;
