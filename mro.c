@@ -247,18 +247,18 @@ expand_macros (FILE* f)
                     }
                 }
               break;
-	    case EXPAND:
-	      if (stack.n_buf >= 1)
-		{
-		  buf = pop_buffer_stack();
-		  null_terminate(buf);
-		  f2 = fmemopen(buf->text, MAXBUFFER, "r");
-		  expand_macros(f2);
-		  fclose(f2);
-		}
-	      else
-		output(c);
-	      break;
+            case EXPAND:
+              if (stack.n_buf >= 1)
+                {
+                  buf = pop_buffer_stack();
+                  null_terminate(buf);
+                  f2 = fmemopen(buf->text, MAXBUFFER, "r");
+                  expand_macros(f2);
+                  fclose(f2);
+                }
+              else
+                output(c);
+              break;
             case '`':
               inquote = 1;
               break;
