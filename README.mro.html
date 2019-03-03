@@ -76,11 +76,13 @@ To build the library, type <code>make</code>.  You can change the default guile 
 
 <h3>Example: automatic section numbering</h3>
 
-<code>`#i=1@%  
-#sec=`Section #i~#i##(+ #i~ 1);@''`@%  
-##sec~$  
+<pre>
+<code>`#i=1@%
+#sec=`Section #i~#i##(+ #i~ 1);@''`@%
+##sec~$
 ##sec~$'
 </code>
+</pre>
 
 The code above would print out Section 1 and then Section 2 and so on.
 
