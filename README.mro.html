@@ -66,15 +66,19 @@ To build the library, type <code>make</code>.  You can change the default guile 
 
 <h2>Use Cases</h2>
 
-<p>mro can be used for the sorts of problem that m4 is used for, but it is much simpler.  I use it for my personal website (see the code at <a href="https://github.com/flynnzac/flynnzac.github.io">https://github.com/flynnzac/flynnzac.github.io</a> and the website at <a href="http://zflynn.com">http://zflynn.com</a>) and I often use it in papers where there are a few parameters of interest that I save to some output files.  To prevent copying errors, I do something like (usually in a separate file "parameters.mro"):
+<p>mro can be used for the sorts of problem that m4 is used for, but it is much simpler.  I use it for my personal website (see the code at <a href="https://github.com/flynnzac/flynnzac.github.io">https://github.com/flynnzac/flynnzac.github.io</a> and the website at <a href="http://zflynn.com">http://zflynn.com</a>). I also use it in papers where there are a few parameters of interest that I save to some output files.  To prevent copying errors, I do something like (usually in a separate file "parameters.mro"):
 
-<p><code>`#rho=#(... code to fetch rho parameter);@'</code>
+<p><code>`#rho=#(... code to fetch rho parameter);@'</code></p>
 
-<p>I can then run:
+<h3>Example: automatic section numbering</h3>
 
-<code>`cat parameters.mro paper.tex | mro > final_paper.tex'</code>
+<code>`#i=1@%
+#sec=`Section #i~#i##(+ #i~ 1);@''`@%
+##sec~$
+##sec~$'
+</code>
 
-Where I use <code>`#rho~'</code> in the paper.tex file.
+The code above would print out Section 1 and then Section 2 and so on.
 
 <h2>Built-in Scheme commands</h2>
 
