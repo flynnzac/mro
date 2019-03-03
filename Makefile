@@ -25,6 +25,7 @@ mro: .FORCE mro.c
 
 doc: README.mro.html
 	cat README.mro.html | mro > README.md
+	cat mro.mro.1 | mro > mro.1
 
 install: mro
 	cp mro /usr/local/bin/

@@ -1,0 +1,72 @@
+.TH mro 1 2019-03-03 
+.SH NAME
+mro \- a stack-based macro processor that can form macros based on results returned by scheme functions
+.SH SYNOPSIS 
+.B mro
+
+.SH DESCRIPTION 
+.B mro
+is a stack-based macro processor.  It reads from standard input, evaluates the macros provided to standard input, and writes the processed text to standard output.  The macros can be constructed by evaluating Guile Scheme code.  The macro language is parsed by reading one character at a time from left to right in a single pass.
+
+.LP
+The macro language is centered around a stack.  When you are on the bottom of the stack, characters typed in are echoed to standard out until a command is reached.  You can move up a level in the stack by using the PUSH command (by default: #).  Text you enter at higher levels of the stack will not be put to standard output but can be accessed by 
+.B mro
+commands.
+
+.SH COMMANDS
+
+The following are the 
+.B mro
+commands
+.TP
+.BR #
+PUSH command.  All text written after the command is the next level up on the stack.
+.TP
+.BR @
+DEFINE command.  Pops the text off the top two levels of the stack and assigns the text at the top of the text to the macro name at the second level from the top.
+.TP
+.BR ~
+REFERENCE command.  Pops the text from the top of the stack, looks up the name of the macro specified there, and puts that text's value to the next level down in the stack.
+.TP
+.BR $
+EXPAND command.  Expands the macros in the text on the top level of the stack.
+.TP
+.BR ;
+EVALUATE command.  Evaluates the text on the top level of the stack as Guile Scheme code, converts the result to a string using Guile's
+.B display
+function, and puts the text to the next buffer down in the stack.
+.TP
+.BR %
+COMMENT.  Ignore any text following the command until a newline character is reached.
+.TP
+.BR `text'
+QUOTE text.  Put the literal text to the current level of the stack.  This is how you escape the command characters.
+
+.SH EXAMPLES
+.LP
+.BR "Section counter"
+.br
+The 
+.B mro
+commands in
+.RS
+#i=1@%
+.br
+#sec=`Section #i~#i##(+ #i~ 1);@'@%
+.br
+##sec~$
+.br
+##sec~$
+.RE
+are expanded to
+.RS
+Section 1
+.br
+Section 2
+.RE
+.SH "SEE ALSO"
+.SH BUGS
+.TP
+Please report as an issue to https://github.com/flynnzac/mro
+.SH AUTHOR
+Zach Flynn <zlflynn@gmail.com>
