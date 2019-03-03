@@ -21,6 +21,7 @@
 #include <string.h>
 #include <libguile.h>
 
+
 /* parser state */
 static int inquote = 0;
 static int incomment = 0;
@@ -28,7 +29,7 @@ static int incomment = 0;
 
 /* buffer stack */
 struct buffer { char* text; int location; int size; };
-struct buffer_stack { struct buffer buf[MAXSTACK]; int n_buf;  };
+struct buffer_stack { struct buffer* buf; int n_buf; int n_alloc; };
 
 struct buffer_stack stack;
 
@@ -79,8 +80,8 @@ push_to_buffer (struct buffer* b, int c)
   if (b->size <= b->location)
     {
       b->text = realloc(b->text,
-                        sizeof(char)*(b->size + PAGE));
-      b->size = b->size + PAGE;
+                        sizeof(char)*(b->size + PAGE_BUFFER));
+      b->size = b->size + PAGE_BUFFER;
     }
   
   b->text[b->location] = c;
@@ -91,8 +92,8 @@ push_to_buffer (struct buffer* b, int c)
 void
 init_buffer (struct buffer* b)
 {
-  b->text = malloc(sizeof(char)*PAGE);
-  b->size = PAGE;
+  b->text = malloc(sizeof(char)*PAGE_BUFFER);
+  b->size = PAGE_BUFFER;
   b->location = 0;
 }
 
@@ -118,16 +119,11 @@ output (int c)
 {
   if (check_dnp(c))
     return;
-
   
   if (stack.n_buf == 0)
-    {
-      printf("%c", c);
-    }
+    printf("%c", c);
   else
-    {
-      push_to_buffer(&stack.buf[stack.n_buf-1], c);
-    }
+    push_to_buffer(&stack.buf[stack.n_buf-1], c);
 }
 
 /* null terminate a buffer */
@@ -157,10 +153,11 @@ void
 free_stack ()
 {
   int i;
-  for (i=0; i < MAXSTACK; i++)
+  for (i=0; i < (PAGE_STACK*stack.n_alloc); i++)
     {
       free(stack.buf[i].text);
     }
+  free(stack.buf);
 }
 
 /* look up macro name */
@@ -246,6 +243,16 @@ expand_macros (FILE* f)
                 }
             case PUSH:
               {
+                if (stack.n_buf >= (PAGE_STACK*stack.n_alloc))
+                  {
+                    stack.n_alloc++;
+                    stack.buf = realloc(stack.buf,
+                                        sizeof(struct buffer)*
+                                        PAGE_STACK*stack.n_alloc);
+                    for (i=(stack.n_alloc-1)*PAGE_STACK;
+                         i < (PAGE_STACK*stack.n_alloc); i++)
+                      init_buffer(stack.buf+i);
+                  }
                 stack.buf[stack.n_buf].location = 0;
                 stack.n_buf++;
               }
@@ -388,7 +395,9 @@ main (int argc, char** argv)
 
   int i;
   stack.n_buf = 0;
-  for (i=0; i < MAXSTACK; i++)
+  stack.n_alloc = 1;
+  stack.buf = malloc(sizeof(struct buffer)*PAGE_STACK);
+  for (i=0; i < PAGE_STACK; i++)
     init_buffer(stack.buf+i);
 
   dnp = malloc(sizeof(char));

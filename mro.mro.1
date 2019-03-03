@@ -8,7 +8,7 @@ mro \- a stack-based macro processor that can form macros based on results retur
 .SH DESCRIPTION #mro~is a stack-based macro processor.  It reads from standard input, evaluates the macros provided to standard input, and writes the processed text to standard output.  The macros can be constructed by evaluating Guile Scheme code.  The macro language is parsed by reading one character at a time from left to right in a single pass.
 
 .LP
-The macro language is centered around a stack.  When you are on the bottom of the stack, characters typed in are echoed to standard out until a command is reached.  You can move up a level in the stack by using the PUSH command (by default: `#').  Text you enter at higher levels of the stack will not be put to standard output but can be accessed by #mro~commands.
+The macro language is centered around a stack.  When you are on the bottom of the stack, characters typed in are echoed to standard output until a command is reached.  You can move up a level in the stack by using the PUSH command (by default: `#').  Text you enter at higher levels of the stack will not be put to standard output but can be accessed by #mro~commands.
 
 .SH COMMANDS
 
