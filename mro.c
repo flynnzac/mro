@@ -29,14 +29,14 @@ static int incomment = 0;
 
 /* buffer stack */
 struct buffer { char* text; int location; int size; };
-struct buffer_stack { struct buffer* buf; int n_buf; int n_alloc; };
+struct buffer_stack { struct buffer* buf; int n_buf; int n_pages; };
 
 struct buffer_stack stack;
 
 /* macro table */
 struct macro { char* name; char* value; };
-static struct macro macro_table[MAXMACROS];
-static int n_macros = 0;
+struct macro_stack { struct macro* table; int n_pages; int n_macros; };
+static struct macro_stack m;
 
 /* characters not to print */
 static char* dnp;
@@ -141,11 +141,12 @@ void
 free_macro_table ()
 {
   int i;
-  for (i=0; i < n_macros; i++)
+  for (i=0; i < m.n_macros; i++)
     {
-      free(macro_table[i].name);
-      free(macro_table[i].value);
+      free(m.table[i].name);
+      free(m.table[i].value);
     }
+  free(m.table);
 }
 
 /* clean up stack */
@@ -153,7 +154,7 @@ void
 free_stack ()
 {
   int i;
-  for (i=0; i < (PAGE_STACK*stack.n_alloc); i++)
+  for (i=0; i < (PAGE_STACK*stack.n_pages); i++)
     {
       free(stack.buf[i].text);
     }
@@ -165,9 +166,9 @@ int
 look_up_name (const struct buffer name)
 {
   int i;
-  for (i = 0; i < n_macros; i++)
+  for (i = 0; i < m.n_macros; i++)
     {
-      if (strcmp(macro_table[i].name, name.text)==0)
+      if (strcmp(m.table[i].name, name.text)==0)
         {
           return i;
         }
@@ -193,14 +194,20 @@ push_macro ()
 
   if (loc < 0)
     {
-      copy_from_buffer(name, &(macro_table[n_macros].name));
-      copy_from_buffer(value, &(macro_table[n_macros].value));
-      n_macros++;
+      if (m.n_macros >= (PAGE_MACRO*m.n_pages))
+        {
+          m.n_pages++;
+          m.table = realloc(m.table,
+                            sizeof(struct macro)*PAGE_MACRO*m.n_pages);
+        }
+      copy_from_buffer(name, &(m.table[m.n_macros].name));
+      copy_from_buffer(value, &(m.table[m.n_macros].value));
+      m.n_macros++;
     }
   else
     {
-      free(macro_table[loc].value);
-      copy_from_buffer(value, &(macro_table[loc].value));
+      free(m.table[loc].value);
+      copy_from_buffer(value, &(m.table[loc].value));
     }
   
 }
@@ -243,14 +250,14 @@ expand_macros (FILE* f)
                 }
             case PUSH:
               {
-                if (stack.n_buf >= (PAGE_STACK*stack.n_alloc))
+                if (stack.n_buf >= (PAGE_STACK*stack.n_pages))
                   {
-                    stack.n_alloc++;
+                    stack.n_pages++;
                     stack.buf = realloc(stack.buf,
                                         sizeof(struct buffer)*
-                                        PAGE_STACK*stack.n_alloc);
-                    for (i=(stack.n_alloc-1)*PAGE_STACK;
-                         i < (PAGE_STACK*stack.n_alloc); i++)
+                                        PAGE_STACK*stack.n_pages);
+                    for (i=(stack.n_pages-1)*PAGE_STACK;
+                         i < (PAGE_STACK*stack.n_pages); i++)
                       init_buffer(stack.buf+i);
                   }
                 stack.buf[stack.n_buf].location = 0;
@@ -271,9 +278,9 @@ expand_macros (FILE* f)
                   loc = look_up_name(*buf);
                   if (loc >= 0)
                     {
-                      for (i=0; i < strlen(macro_table[loc].value); i++)
+                      for (i=0; i < strlen(m.table[loc].value); i++)
                         {
-                          output(macro_table[loc].value[i]);
+                          output(m.table[loc].value[i]);
                         }
                     }
                 }
@@ -394,11 +401,16 @@ main (int argc, char** argv)
 {
 
   int i;
+
   stack.n_buf = 0;
-  stack.n_alloc = 1;
+  stack.n_pages = 1;
   stack.buf = malloc(sizeof(struct buffer)*PAGE_STACK);
   for (i=0; i < PAGE_STACK; i++)
     init_buffer(stack.buf+i);
+
+  m.n_macros = 0;
+  m.n_pages = 1;
+  m.table = malloc(sizeof(struct macro)*PAGE_MACRO);
 
   dnp = malloc(sizeof(char));
   dnp[0] = '\0';
