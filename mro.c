@@ -387,7 +387,6 @@ main (int argc, char** argv)
 {
 
   int i;
-  FILE* f;
   stack.n_buf = 0;
   for (i=0; i < MAXSTACK; i++)
     init_buffer(stack.buf+i);
@@ -398,15 +397,7 @@ main (int argc, char** argv)
 
   scm_with_guile(&register_guile_functions, NULL);
 
-  if (argc == 2)
-    f = fopen(argv[1], "r");
-  else
-    f = stdin;
-      
-  expand_macros(f);
-
-  if (argc == 2)
-    fclose(f);
+  expand_macros(stdin);
 
   free_stack();
   free_macro_table();

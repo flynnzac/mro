@@ -5,6 +5,10 @@ stack-based macro processor extensible with guile
 
 <p>All of the program's commands are single characters.  The default command characters are well-suited to producing Tex files and HTML files which is mostly what I use the program for.  These characters can be changed by providing options to the <code>make</code> command.</p>
 
+<p>The program reads macros from standard input and writes to standard output, so the usual command for executing <code>mro</code> is:</p>
+
+<p><code>cat file.mro.html | mro > file.html</code></p>
+
 <h2>Installation</h2>
 
 <code>mro</code> depends on guile and the standard C library.  I made no effort to avoid using GNU C library-specific features so the program might use those.
