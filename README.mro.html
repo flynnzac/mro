@@ -60,7 +60,7 @@ stack-based macro processor extensible with guile
 
 <h2>Use Cases</h2>
 
-<p>mro can be used for the sorts of problem that m4 is used for, but it is much simpler.  I often use it in papers where there are a few parameters of interest that I save to some output files.  To prevent copying errors, I do something like (usually in a separate file "parameters.mro"):
+<p>mro can be used for the sorts of problem that m4 is used for, but it is much simpler.  I use it for my personal website (see the code at <a href="https://github.com/flynnzac/flynnzac.github.io">https://github.com/flynnzac/flynnzac.github.io</a> and the website at <a href="http://zflynn.com">http://zflynn.com</a>) and I often use it in papers where there are a few parameters of interest that I save to some output files.  To prevent copying errors, I do something like (usually in a separate file "parameters.mro"):
 
 <p><code>`#rho=#(... code to fetch rho parameter);@'</code>
 
