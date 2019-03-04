@@ -16,14 +16,17 @@ guile_lib = guile-2.2
 
 .FORCE:
 mro: .FORCE mro.c
-	cc -I $(guile_include) mro.c -l$(guile_lib) -o mro \
+	cat mro.c | mro > mro.tmp.c
+	cc -I $(guile_include) mro.tmp.c -l$(guile_lib) -o mro \
 	-DPAGE_MACRO=$(page_macro) \
 	-DPAGE_BUFFER=$(page_buffer) \
 	-DPAGE_STACK=$(page_stack)  \
 	-DDEFINE=$(define)  -DCOMMENT_START=$(comment_start) \
 	-DCOMMENT_END=$(comment_end) -DPUSH=$(push) -DPUSH2=$(push2) \
-	-DREF=$(ref) -DCODE=$(code) -DEXPAND=$(expand)  -Wall 
+	-DREF=$(ref) -DCODE=$(code) -DEXPAND=$(expand)  -Wall
 
+clean: mro.tmp.c
+	rm mro.tmp.c
 
 doc: README.mro.html
 	cat README.mro.html | mro > README.md

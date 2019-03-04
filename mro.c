@@ -16,11 +16,12 @@
    this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-`#'include <stdlib.h>
-`#'include <stdio.h>
-`#'include <string.h>
-`#'include <libguile.h>
-
+`
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <libguile.h>
+'
 
 /* parser state */
 static int inquote = 0;
@@ -121,7 +122,7 @@ output (int c)
     return;
   
   if (stack.n_buf == 0)
-    printf("%c", c);
+    printf("`%'c", c);
   else
     push_to_buffer(&stack.buf[stack.n_buf-1], c);
 }
@@ -320,7 +321,7 @@ expand_macros (FILE* f)
               else
                 output(c);
               break;
-            case '`':
+            case '``'':
               inquote = 1;
               break;
             case COMMENT_START:
@@ -337,10 +338,25 @@ expand_macros (FILE* f)
   
 }
 
+/* define macros to add guile functions */
+
+#register=
+void*
+register_guile_functions (void* data)
+{@
+#gfunc=`#register##register~
+  scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~)`;''`@%
+SCM
+guile_#name~'@
+#regbuild=`#register~
+
+  return NULL`;''`
+}'@
+
 /* guile: add to do not print list */
 
 #name=add_to_dnp@
-#num=1@
+#argnum=1@
 ##gfunc~$ (SCM ch)
 {
   char* str = scm_to_locale_string(ch);
@@ -352,7 +368,7 @@ expand_macros (FILE* f)
 /* guile: clear do not print list */
 
 #name=printall@
-#num=0@
+#argnum=0@
 ##gfunc~$ ()
 {
   dnp = realloc(dnp, sizeof(char));
@@ -364,8 +380,9 @@ expand_macros (FILE* f)
 
 /* guile: start a definition section by adding \n to do not print
    list */
+
 #name=defsec@
-#num=0@
+#argnum=0@
 ##gfunc~$ ()
 {
   add_to_dnp('\n');
@@ -374,7 +391,7 @@ expand_macros (FILE* f)
 
 /* guile: source a macro file as if it was entered along with text */
 #name=source@
-#num=1@
+#argnum=1@
 ##gfunc~$ (SCM file)
 {
   char* file_c = scm_to_locale_string(file);
