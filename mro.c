@@ -340,18 +340,22 @@ expand_macros (FILE* f)
 
 /* define macros to add guile functions */
 
-#register=
-void*
-register_guile_functions (void* data)
-{@
-#gfunc=`#register##register~
+/*
+
+  #register=
+  void*
+  register_guile_functions (void* data)
+  {@
+  #gfunc=`#register##register~
   scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~)`;''`@%
-SCM
-guile_#name~'@
-#regbuild=`#register~
+  SCM
+  guile_#name~'@
+  #regbuild=`#register~
 
   return NULL`;''`
-}'@
+  }'@
+
+*/
 
 /* guile: add to do not print list */
 
