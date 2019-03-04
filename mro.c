@@ -138,6 +138,7 @@ null_terminate (struct buffer* b)
 
 /* clean up macro table */
 
+
 void
 free_macro_table ()
 {
@@ -213,11 +214,8 @@ push_macro ()
   
 }
 
-/* macro to output if not sufficient stack:
-   #cmd=`if (stack.n_buf >= #stack_reqd~) { #logic~ } else output(c); break;'@
-   
- */
 
+#cmd=`if (stack.n_buf >= #stack_reqd~) { #logic~ } else output(c); break;'@
 
 void
 expand_macros (FILE* f)
@@ -339,22 +337,18 @@ expand_macros (FILE* f)
 
 /* define macros to add guile functions */
 
-/*
+#register=
+void*
+register_guile_functions (void* data)
+{@
+    #gfunc=`#register##register~
+    scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~);@%
+    SCM
+      guile_#name~'@
+      #regbuild=`#register~
 
-  #register=
-  void*
-  register_guile_functions (void* data)
-  {@
-  #gfunc=`#register##register~
-  scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~);@%
-  SCM
-  guile_#name~'@
-  #regbuild=`#register~
-
-  return NULL;
-  }'@
-
-*/
+      return NULL;
+}'@;
 
 /* guile: add to do not print list */
 
@@ -411,7 +405,6 @@ expand_macros (FILE* f)
 int
 main (int argc, char** argv)
 {
-
   int i;
 
   stack.n_buf = 0;
@@ -434,6 +427,6 @@ main (int argc, char** argv)
   free_stack();
   free_macro_table();
   free(dnp);
-  return 0;
 
+  return 0;
 }

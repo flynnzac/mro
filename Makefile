@@ -14,7 +14,7 @@ expand = 36
 guile_include = /usr/include/guile/2.2
 guile_lib = guile-2.2
 
-mro: mro.expand.c
+mro: mro.expand.c expand
 	cc -I $(guile_include) mro.expand.c -l$(guile_lib) -o mro \
 	-DPAGE_MACRO=$(page_macro) \
 	-DPAGE_BUFFER=$(page_buffer) \

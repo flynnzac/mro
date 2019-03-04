@@ -138,6 +138,7 @@ null_terminate (struct buffer* b)
 
 /* clean up macro table */
 
+
 void
 free_macro_table ()
 {
@@ -213,10 +214,7 @@ push_macro ()
   
 }
 
-/* macro to output if not sufficient stack:
-   
-   
- */
+
 
 
 void
@@ -339,20 +337,16 @@ expand_macros (FILE* f)
 
 /* define macros to add guile functions */
 
-/*
 
-  
-  
-  
-
-*/
+    
+      ;
 
 /* guile: add to do not print list */
 
 
 
-  SCM
-  guile_add_to_dnp (SCM ch)
+    SCM
+      guile_add_to_dnp (SCM ch)
 {
   char* str = scm_to_locale_string(ch);
   add_to_dnp(str[0]);
@@ -364,8 +358,8 @@ expand_macros (FILE* f)
 
 
 
-  SCM
-  guile_printall ()
+    SCM
+      guile_printall ()
 {
   dnp = realloc(dnp, sizeof(char));
   dnp[0] = '\0';
@@ -379,8 +373,8 @@ expand_macros (FILE* f)
 
 
 
-  SCM
-  guile_defsec ()
+    SCM
+      guile_defsec ()
 {
   add_to_dnp('\n');
   return scm_from_locale_string("");
@@ -389,8 +383,8 @@ expand_macros (FILE* f)
 /* guile: source a macro file as if it was entered along with text */
 
 
-  SCM
-  guile_source (SCM file)
+    SCM
+      guile_source (SCM file)
 {
   char* file_c = scm_to_locale_string(file);
   FILE* f = fopen(file_c, "r");
@@ -401,22 +395,21 @@ expand_macros (FILE* f)
 }
 
 
-  void*
-  register_guile_functions (void* data)
-  {
-  scm_c_define_gsubr("add_to_dnp", 1, 0, 0, &guile_add_to_dnp);
-  scm_c_define_gsubr("printall", 0, 0, 0, &guile_printall);
-  scm_c_define_gsubr("defsec", 0, 0, 0, &guile_defsec);
-  scm_c_define_gsubr("source", 1, 0, 0, &guile_source);
+void*
+register_guile_functions (void* data)
+{
+    scm_c_define_gsubr("add_to_dnp", 1, 0, 0, &guile_add_to_dnp);
+    scm_c_define_gsubr("printall", 0, 0, 0, &guile_printall);
+    scm_c_define_gsubr("defsec", 0, 0, 0, &guile_defsec);
+    scm_c_define_gsubr("source", 1, 0, 0, &guile_source);
 
-  return NULL;
-  }
+      return NULL;
+}
 
 /* main program */
 int
 main (int argc, char** argv)
 {
-
   int i;
 
   stack.n_buf = 0;
@@ -439,6 +432,6 @@ main (int argc, char** argv)
   free_stack();
   free_macro_table();
   free(dnp);
-  return 0;
 
+  return 0;
 }
