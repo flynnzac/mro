@@ -4,7 +4,7 @@ page_stack=100
 page_macro=100
 
 define="'@'"
-code="';'"
+code="'|'"
 comment_start="'%'"
 comment_end="'\\n'"
 push = "'\#'"

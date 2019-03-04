@@ -31,8 +31,8 @@ REFERENCE command.  Pops the text from the top of the stack, looks up the name o
 .BR $
 EXPAND command.  Expands the macros in the text on the top level of the stack.
 .TP
-.BR ;
-EVALUATE command.  Evaluates the text on the top level of the stack as Guile Scheme code, converts the result to a string using Guile's
+.BR |
+CODE command.  Evaluates the text on the top level of the stack as Guile Scheme code, converts the result to a string using Guile's
 .B display
 function, and puts the text to the next buffer down in the stack.
 .TP

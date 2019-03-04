@@ -347,12 +347,12 @@ expand_macros (FILE* f)
   register_guile_functions (void* data)
   {@
   #gfunc=`#register##register~
-  scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~)`;''`@%
+  scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~);@%
   SCM
   guile_#name~'@
   #regbuild=`#register~
 
-  return NULL`;''`
+  return NULL;
   }'@
 
 */
