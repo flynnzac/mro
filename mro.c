@@ -213,6 +213,15 @@ push_macro ()
   
 }
 
+/* macro to output if not sufficient stack:
+   #begincmd=`if (stack.n_buf >= #stack_reqd~)'@
+   #endcmd=
+   else
+     output(c);
+   break;@
+   
+ */
+
 
 void
 expand_macros (FILE* f)
@@ -266,13 +275,15 @@ expand_macros (FILE* f)
               }
               break;
             case DEFINE:
-              if (stack.n_buf >= 2)
-                push_macro();
-              else
-                output(c);
-              break;
+	      #stack_reqd=2@
+	      ##begincmd~$
+		{
+		  push_macro();
+		}
+	      #endcmd~
             case REF:
-              if (stack.n_buf >= 1)
+	      #stack_reqd=1@
+	      ##begincmd~$
                 {
                   buf = pop_buffer_stack();
                   null_terminate(buf);
@@ -285,11 +296,10 @@ expand_macros (FILE* f)
                         }
                     }
                 }
-              else
-                output(c);
-              break;
+	      #endcmd~
             case CODE:
-              if (stack.n_buf >= 1)
+	      #stack_reqd=1@
+	      ##begincmd~$
                 {
                   buf = pop_buffer_stack();
                   null_terminate(buf);
@@ -306,11 +316,10 @@ expand_macros (FILE* f)
                       free(guile_str);
                     }
                 }
-	      else
-		output(c);
-              break;
+	      #endcmd~
             case EXPAND:
-              if (stack.n_buf >= 1)
+	      #stack_reqd=1@
+	      ##begincmd~$
                 {
                   buf = pop_buffer_stack();
                   null_terminate(buf);
@@ -318,9 +327,7 @@ expand_macros (FILE* f)
                   expand_macros(f2);
                   fclose(f2);
                 }
-              else
-                output(c);
-              break;
+	      #endcmd~
             case '``'':
               inquote = 1;
               break;
