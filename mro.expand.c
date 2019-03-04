@@ -217,6 +217,7 @@ push_macro ()
 
 
 
+
 void
 expand_macros (FILE* f)
 {
@@ -277,8 +278,7 @@ expand_macros (FILE* f)
 	      
 	      ;
 	      if (stack.n_buf >= 1) { 
-	      buf = pop_buffer_stack();
-	      null_terminate(buf);
+	      buf=pop_buffer_stack(); null_terminate(buf);
 	      loc = look_up_name(*buf);
 	      if (loc >= 0)
 		{
@@ -292,8 +292,7 @@ expand_macros (FILE* f)
 	      ;
 	      
 	      if (stack.n_buf >= 1) { 
-	      buf = pop_buffer_stack();
-	      null_terminate(buf);
+	      buf=pop_buffer_stack(); null_terminate(buf);
 	      guile_ret = scm_c_eval_string(buf->text);
 	      if (!scm_is_eq(guile_ret, SCM_UNSPECIFIED))
 		{
@@ -312,8 +311,7 @@ expand_macros (FILE* f)
 	      ;
 
 	      if (stack.n_buf >= 1) { 
-	      buf = pop_buffer_stack();
-	      null_terminate(buf);
+	      buf=pop_buffer_stack(); null_terminate(buf);
 	      f2 = fmemopen(buf->text, buf->size, "r");
 	      expand_macros(f2);
 	      fclose(f2); } else output(c); break;
