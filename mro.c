@@ -1,7 +1,26 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <libguile.h>
+/* 
+   mro - a simple macro expander extendable with Guile Scheme
+
+   Copyright Zach Flynn <zlflynn@gmail.com>
+
+   This program is free software: you can redistribute it and/or modify it under
+   the terms of version 3 of the GNU General Public License as published by the
+   Free Software Foundation.
+
+   This program is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+   FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+   details.
+
+   You should have received a copy of the GNU General Public License along with
+   this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+`#'include <stdlib.h>
+`#'include <stdio.h>
+`#'include <string.h>
+`#'include <libguile.h>
+
 
 /* parser state */
 static int inquote = 0;
@@ -9,15 +28,15 @@ static int incomment = 0;
 
 
 /* buffer stack */
-struct buffer { char text[MAXBUFFER]; int location; };
-struct buffer_stack { struct buffer buf[MAXSTACK]; int n_buf;  };
+struct buffer { char* text; int location; int size; };
+struct buffer_stack { struct buffer* buf; int n_buf; int n_pages; };
 
 struct buffer_stack stack;
 
 /* macro table */
 struct macro { char* name; char* value; };
-static struct macro macro_table[MAXMACROS];
-static int n_macros = 0;
+struct macro_stack { struct macro* table; int n_pages; int n_macros; };
+static struct macro_stack m;
 
 /* characters not to print */
 static char* dnp;
@@ -58,8 +77,24 @@ pop_buffer_stack ()
 void
 push_to_buffer (struct buffer* b, int c)
 {
+  if (b->size <= b->location)
+    {
+      b->text = realloc(b->text,
+                        sizeof(char)*(b->size + PAGE_BUFFER));
+      b->size = b->size + PAGE_BUFFER;
+    }
+  
   b->text[b->location] = c;
   b->location = b->location + 1;
+}
+
+/* init buffer */
+void
+init_buffer (struct buffer* b)
+{
+  b->text = malloc(sizeof(char)*PAGE_BUFFER);
+  b->size = PAGE_BUFFER;
+  b->location = 0;
 }
 
 /* copy buffer to string */
@@ -84,16 +119,11 @@ output (int c)
 {
   if (check_dnp(c))
     return;
-
   
   if (stack.n_buf == 0)
-    {
-      printf("%c", c);
-    }
+    printf("%c", c);
   else
-    {
-      push_to_buffer(&stack.buf[stack.n_buf-1], c);
-    }
+    push_to_buffer(&stack.buf[stack.n_buf-1], c);
 }
 
 /* null terminate a buffer */
@@ -101,9 +131,9 @@ output (int c)
 void
 null_terminate (struct buffer* b)
 {
-  b->text[b->location] = '\0';
+  push_to_buffer(b, '\0');
+  b->location--;
 }
-
 
 /* clean up macro table */
 
@@ -111,11 +141,24 @@ void
 free_macro_table ()
 {
   int i;
-  for (i=0; i < n_macros; i++)
+  for (i=0; i < m.n_macros; i++)
     {
-      free(macro_table[i].name);
-      free(macro_table[i].value);
+      free(m.table[i].name);
+      free(m.table[i].value);
     }
+  free(m.table);
+}
+
+/* clean up stack */
+void
+free_stack ()
+{
+  int i;
+  for (i=0; i < (PAGE_STACK*stack.n_pages); i++)
+    {
+      free(stack.buf[i].text);
+    }
+  free(stack.buf);
 }
 
 /* look up macro name */
@@ -123,9 +166,9 @@ int
 look_up_name (const struct buffer name)
 {
   int i;
-  for (i = 0; i < n_macros; i++)
+  for (i = 0; i < m.n_macros; i++)
     {
-      if (strcmp(macro_table[i].name, name.text)==0)
+      if (strcmp(m.table[i].name, name.text)==0)
         {
           return i;
         }
@@ -151,14 +194,20 @@ push_macro ()
 
   if (loc < 0)
     {
-      copy_from_buffer(name, &(macro_table[n_macros].name));
-      copy_from_buffer(value, &(macro_table[n_macros].value));
-      n_macros++;
+      if (m.n_macros >= (PAGE_MACRO*m.n_pages))
+        {
+          m.n_pages++;
+          m.table = realloc(m.table,
+                            sizeof(struct macro)*PAGE_MACRO*m.n_pages);
+        }
+      copy_from_buffer(name, &(m.table[m.n_macros].name));
+      copy_from_buffer(value, &(m.table[m.n_macros].value));
+      m.n_macros++;
     }
   else
     {
-      free(macro_table[loc].value);
-      copy_from_buffer(value, &(macro_table[loc].value));
+      free(m.table[loc].value);
+      copy_from_buffer(value, &(m.table[loc].value));
     }
   
 }
@@ -201,6 +250,16 @@ expand_macros (FILE* f)
                 }
             case PUSH:
               {
+                if (stack.n_buf >= (PAGE_STACK*stack.n_pages))
+                  {
+                    stack.n_pages++;
+                    stack.buf = realloc(stack.buf,
+                                        sizeof(struct buffer)*
+                                        PAGE_STACK*stack.n_pages);
+                    for (i=(stack.n_pages-1)*PAGE_STACK;
+                         i < (PAGE_STACK*stack.n_pages); i++)
+                      init_buffer(stack.buf+i);
+                  }
                 stack.buf[stack.n_buf].location = 0;
                 stack.n_buf++;
               }
@@ -219,9 +278,9 @@ expand_macros (FILE* f)
                   loc = look_up_name(*buf);
                   if (loc >= 0)
                     {
-                      for (i=0; i < strlen(macro_table[loc].value); i++)
+                      for (i=0; i < strlen(m.table[loc].value); i++)
                         {
-                          output(macro_table[loc].value[i]);
+                          output(m.table[loc].value[i]);
                         }
                     }
                 }
@@ -246,19 +305,21 @@ expand_macros (FILE* f)
                       free(guile_str);
                     }
                 }
-              break;
-	    case EXPAND:
-	      if (stack.n_buf >= 1)
-		{
-		  buf = pop_buffer_stack();
-		  null_terminate(buf);
-		  f2 = fmemopen(buf->text, MAXBUFFER, "r");
-		  expand_macros(f2);
-		  fclose(f2);
-		}
 	      else
 		output(c);
-	      break;
+              break;
+            case EXPAND:
+              if (stack.n_buf >= 1)
+                {
+                  buf = pop_buffer_stack();
+                  null_terminate(buf);
+                  f2 = fmemopen(buf->text, buf->size, "r");
+                  expand_macros(f2);
+                  fclose(f2);
+                }
+              else
+                output(c);
+              break;
             case '`':
               inquote = 1;
               break;
@@ -278,8 +339,9 @@ expand_macros (FILE* f)
 
 /* guile: add to do not print list */
 
-SCM
-guile_add_to_dnp (SCM ch)
+#name=add_to_dnp@
+#num=1@
+##gfunc~$ (SCM ch)
 {
   char* str = scm_to_locale_string(ch);
   add_to_dnp(str[0]);
@@ -289,8 +351,9 @@ guile_add_to_dnp (SCM ch)
 
 /* guile: clear do not print list */
 
-SCM
-guile_printall ()
+#name=printall@
+#num=0@
+##gfunc~$ ()
 {
   dnp = realloc(dnp, sizeof(char));
   dnp[0] = '\0';
@@ -301,16 +364,18 @@ guile_printall ()
 
 /* guile: start a definition section by adding \n to do not print
    list */
-SCM
-guile_defsec ()
+#name=defsec@
+#num=0@
+##gfunc~$ ()
 {
   add_to_dnp('\n');
   return scm_from_locale_string("");
 }
 
 /* guile: source a macro file as if it was entered along with text */
-SCM
-guile_source (SCM file)
+#name=source@
+#num=1@
+##gfunc~$ (SCM file)
 {
   char* file_c = scm_to_locale_string(file);
   FILE* f = fopen(file_c, "r");
@@ -320,30 +385,33 @@ guile_source (SCM file)
   return scm_from_locale_string("");
 }
 
-void*
-register_guile_functions (void* data)
-{
-  scm_c_define_gsubr("add-to-dnp", 1, 0, 0, &guile_add_to_dnp);
-  scm_c_define_gsubr("printall", 0, 0, 0, &guile_printall);
-  scm_c_define_gsubr("defsec", 0, 0, 0, &guile_defsec);
-  scm_c_define_gsubr("source", 1, 0, 0, &guile_source);
-
-  return NULL;
-}
+##regbuild~$
 
 /* main program */
 int
 main (int argc, char** argv)
 {
 
+  int i;
+
   stack.n_buf = 0;
+  stack.n_pages = 1;
+  stack.buf = malloc(sizeof(struct buffer)*PAGE_STACK);
+  for (i=0; i < PAGE_STACK; i++)
+    init_buffer(stack.buf+i);
+
+  m.n_macros = 0;
+  m.n_pages = 1;
+  m.table = malloc(sizeof(struct macro)*PAGE_MACRO);
+
   dnp = malloc(sizeof(char));
   dnp[0] = '\0';
   n_dnp = 1;
   scm_with_guile(&register_guile_functions, NULL);
   
   expand_macros(stdin);
-  
+
+  free_stack();
   free_macro_table();
   free(dnp);
   return 0;
