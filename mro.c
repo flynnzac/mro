@@ -21,11 +21,9 @@
 #include <string.h>
 #include <libguile.h>
 
-
 /* parser state */
 static int inquote = 0;
 static int incomment = 0;
-
 
 /* buffer stack */
 struct buffer { char* text; int location; int size; };
@@ -36,6 +34,7 @@ struct buffer_stack stack;
 /* macro table */
 struct macro { char* name; char* value; };
 struct macro_stack { struct macro* table; int n_pages; int n_macros; };
+
 static struct macro_stack m;
 
 /* characters not to print */
@@ -55,11 +54,11 @@ int
 check_dnp (int c)
 {
   int i;
+
   for (i=1; i < n_dnp; i++)
-    {
-      if (dnp[i]==c)
-        return 1;
-    }
+    if (dnp[i]==c)
+      return 1;
+
   return 0;
 }
 
@@ -166,13 +165,11 @@ int
 look_up_name (const struct buffer name)
 {
   int i;
+
   for (i = 0; i < m.n_macros; i++)
-    {
-      if (strcmp(m.table[i].name, name.text)==0)
-        {
-          return i;
-        }
-    }
+    if (strcmp(m.table[i].name, name.text)==0)
+      return i;
+
   return -1;
 }
 
@@ -183,9 +180,11 @@ push_macro ()
 
 {
   int loc;
+  struct buffer* value;
+  struct buffer* name;
   
-  struct buffer* value = pop_buffer_stack();
-  struct buffer* name = pop_buffer_stack();
+  value = pop_buffer_stack();
+  name = pop_buffer_stack();
 
   null_terminate(value);
   null_terminate(name);
@@ -209,9 +208,7 @@ push_macro ()
       free(m.table[loc].value);
       copy_from_buffer(value, &(m.table[loc].value));
     }
-  
 }
-
 
 void
 expand_macros (FILE* f)
