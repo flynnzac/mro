@@ -276,7 +276,6 @@ expand_macros (FILE* f)
   
 }
 
-
 /* guile: add to do not print list */
 
 SCM
@@ -300,9 +299,8 @@ guile_printall ()
   return scm_from_locale_string("");
 }
 
-/* guile: start a definition section by adding \n and ' ' to do not print
+/* guile: start a definition section by adding \n to do not print
    list */
-
 SCM
 guile_defsec ()
 {
@@ -311,7 +309,6 @@ guile_defsec ()
 }
 
 /* guile: source a macro file as if it was entered along with text */
-
 SCM
 guile_source (SCM file)
 {
@@ -329,12 +326,10 @@ register_guile_functions (void* data)
   scm_c_define_gsubr("add-to-dnp", 1, 0, 0, &guile_add_to_dnp);
   scm_c_define_gsubr("printall", 0, 0, 0, &guile_printall);
   scm_c_define_gsubr("defsec", 0, 0, 0, &guile_defsec);
-
   scm_c_define_gsubr("source", 1, 0, 0, &guile_source);
 
   return NULL;
 }
-
 
 /* main program */
 int
@@ -342,15 +337,13 @@ main (int argc, char** argv)
 {
 
   stack.n_buf = 0;
-
   dnp = malloc(sizeof(char));
   dnp[0] = '\0';
   n_dnp = 1;
-
   scm_with_guile(&register_guile_functions, NULL);
-
+  
   expand_macros(stdin);
-
+  
   free_macro_table();
   free(dnp);
   return 0;
