@@ -185,13 +185,12 @@ push_macro ()
 
 {
   int loc;
-  
-  struct buffer* value = pop_buffer_stack();
-  struct buffer* name = pop_buffer_stack();
+  struct buffer* value;
+  struct buffer* name;
 
-  null_terminate(value);
-  null_terminate(name);
-
+   value=pop_buffer_stack(); null_terminate(value);;
+   name=pop_buffer_stack(); null_terminate(name);;
+    
   loc = look_up_name(*name);
 
   if (loc < 0)
@@ -281,12 +280,9 @@ expand_macros (FILE* f)
 	      buf=pop_buffer_stack(); null_terminate(buf);
 	      loc = look_up_name(*buf);
 	      if (loc >= 0)
-		{
-		  for (i=0; i < strlen(m.table[loc].value); i++)
-		    {
-		      output(m.table[loc].value[i]);
-		    }
-		} } else output(c); break;
+		for (i=0; i < strlen(m.table[loc].value); i++)
+		  output(m.table[loc].value[i]);
+	       } else output(c); break;
             case CODE:
 	      
 	      ;

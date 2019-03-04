@@ -178,20 +178,19 @@ look_up_name (const struct buffer name)
   return -1;
 }
 
-
+#popbuf=`#buf~=pop_buffer_stack(); null_terminate(#buf~);'@
 /* add macro given top two elements in buffer */
 void
 push_macro ()
 
 {
   int loc;
-  
-  struct buffer* value = pop_buffer_stack();
-  struct buffer* name = pop_buffer_stack();
+  struct buffer* value;
+  struct buffer* name;
 
-  null_terminate(value);
-  null_terminate(name);
-
+  #buf=value@ ##popbuf~$;
+  #buf=name@ ##popbuf~$;
+    
   loc = look_up_name(*name);
 
   if (loc < 0)
@@ -216,7 +215,7 @@ push_macro ()
 
 
 #cmd=`if (stack.n_buf >= #stack_reqd~) { #logic~ } else output(c); break;'@
-#popbuf=`buf=pop_buffer_stack(); null_terminate(buf);'@
+#buf=buf@
 
 void
 expand_macros (FILE* f)
@@ -277,7 +276,7 @@ expand_macros (FILE* f)
             case REF:
 	      #stack_reqd=1@
 	      #logic=
-	      #popbuf~
+	      ##popbuf~$
 	      loc = look_up_name(*buf);
 	      if (loc >= 0)
 		for (i=0; i < strlen(m.table[loc].value); i++)
@@ -287,7 +286,7 @@ expand_macros (FILE* f)
             case CODE:
 	      #stack_reqd=1@
 	      #logic=
-	      #popbuf~
+	      ##popbuf~$
 	      guile_ret = scm_c_eval_string(buf->text);
 	      if (!scm_is_eq(guile_ret, SCM_UNSPECIFIED))
 		{
@@ -306,7 +305,7 @@ expand_macros (FILE* f)
             case EXPAND:
 	      #stack_reqd=1@
 	      #logic=
-	      #popbuf~
+	      ##popbuf~$
 	      f2 = fmemopen(buf->text, buf->size, "r");
 	      expand_macros(f2);
 	      fclose(f2);@;
