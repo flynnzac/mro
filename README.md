@@ -62,7 +62,7 @@ To build the library, type <code>make</code>.  You can change the default guile 
 
 <h2>Use Cases</h2>
 
-<p>mro can be used for the sorts of problem that m4 or the C pre-processor is used for, but it is simple and allows access to a full programming language if necessary.  I use it for my personal website -- see the code at <a href="https://github.com/flynnzac/flynnzac.github.io">https://github.com/flynnzac/flynnzac.github.io</a> and the website at <a href="http://zflynn.com">http://zflynn.com</a>.   I also use it in the source code for <code>mro</code>itself to generate some boilerplate code making some C functions callable from Scheme.</p>
+<p>mro can be used for the sorts of problem that m4 or the C pre-processor is used for, but it is simple and allows access to a full programming language if necessary.  I use it for my personal website -- see the code at <a href="https://github.com/flynnzac/flynnzac.github.io">https://github.com/flynnzac/flynnzac.github.io</a> and the website at <a href="http://zflynn.com">http://zflynn.com</a>.   I also use it in the source code for <code>mro</code>itself to generate boilerplate code making C functions callable from Scheme.</p>
 
 <h3>Example: boilerplate code generation</h3>
 
