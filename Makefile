@@ -14,10 +14,8 @@ expand = 36
 guile_include = /usr/include/guile/2.2
 guile_lib = guile-2.2
 
-.FORCE:
-mro: .FORCE mro.c
-	cat mro.c | mro > mro.tmp.c
-	cc -I $(guile_include) mro.tmp.c -l$(guile_lib) -o mro \
+mro: mro.expand.c
+	cc -I $(guile_include) mro.expand.c -l$(guile_lib) -o mro \
 	-DPAGE_MACRO=$(page_macro) \
 	-DPAGE_BUFFER=$(page_buffer) \
 	-DPAGE_STACK=$(page_stack)  \
@@ -25,8 +23,11 @@ mro: .FORCE mro.c
 	-DCOMMENT_END=$(comment_end) -DPUSH=$(push) -DPUSH2=$(push2) \
 	-DREF=$(ref) -DCODE=$(code) -DEXPAND=$(expand)  -Wall
 
-clean: mro.tmp.c
-	rm mro.tmp.c
+expand: mro.c
+	cat mro.c | mro > mro.expand.c
+
+clean: mro
+	rm mro.expand.c
 
 doc: README.mro.html
 	cat README.mro.html | mro > README.md

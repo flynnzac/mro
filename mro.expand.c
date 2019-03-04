@@ -16,12 +16,12 @@
    this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-`
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <libguile.h>
-'
+
 
 /* parser state */
 static int inquote = 0;
@@ -122,7 +122,7 @@ output (int c)
     return;
   
   if (stack.n_buf == 0)
-    printf("`%'c", c);
+    printf("%c", c);
   else
     push_to_buffer(&stack.buf[stack.n_buf-1], c);
 }
@@ -214,7 +214,7 @@ push_macro ()
 }
 
 /* macro to output if not sufficient stack:
-   #cmd=`if (stack.n_buf >= #stack_reqd~) { #logic~ } else output(c); break;'@
+   
    
  */
 
@@ -271,13 +271,14 @@ expand_macros (FILE* f)
               }
               break;
             case DEFINE:
-	      #stack_reqd=2@
-	      #logic=push_macro();@
-	      ##cmd~$
+	      
+	      
+	      if (stack.n_buf >= 2) { push_macro(); } else output(c); break;
 
             case REF:
-	      #stack_reqd=1@
-	      #logic=
+	      
+	      ;
+	      if (stack.n_buf >= 1) { 
 	      buf = pop_buffer_stack();
 	      null_terminate(buf);
 	      loc = look_up_name(*buf);
@@ -287,11 +288,12 @@ expand_macros (FILE* f)
 		    {
 		      output(m.table[loc].value[i]);
 		    }
-		}@;
-	      ##cmd~$
+		} } else output(c); break;
             case CODE:
-	      #stack_reqd=1@
-	      #logic=
+	      
+	      ;
+	      
+	      if (stack.n_buf >= 1) { 
 	      buf = pop_buffer_stack();
 	      null_terminate(buf);
 	      guile_ret = scm_c_eval_string(buf->text);
@@ -305,22 +307,20 @@ expand_macros (FILE* f)
 		    output(guile_str[i]);
 		  
 		  free(guile_str);
-		}@;
-	      
-	      ##cmd~$
+		} } else output(c); break;
 		
             case EXPAND:
-	      #stack_reqd=1@
-	      #logic=
+	      
+	      ;
+
+	      if (stack.n_buf >= 1) { 
 	      buf = pop_buffer_stack();
 	      null_terminate(buf);
 	      f2 = fmemopen(buf->text, buf->size, "r");
 	      expand_macros(f2);
-	      fclose(f2);@;
+	      fclose(f2); } else output(c); break;
 
-	      ##cmd~$
-
-            case '``'':
+            case '`':
               inquote = 1;
               break;
             case COMMENT_START:
@@ -341,26 +341,18 @@ expand_macros (FILE* f)
 
 /*
 
-  #register=
-  void*
-  register_guile_functions (void* data)
-  {@
-  #gfunc=`#register##register~
-  scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~);@%
-  SCM
-  guile_#name~'@
-  #regbuild=`#register~
-
-  return NULL;
-  }'@
+  
+  
+  
 
 */
 
 /* guile: add to do not print list */
 
-#name=add_to_dnp@
-#argnum=1@
-##gfunc~$ (SCM ch)
+
+
+  SCM
+  guile_add_to_dnp (SCM ch)
 {
   char* str = scm_to_locale_string(ch);
   add_to_dnp(str[0]);
@@ -370,9 +362,10 @@ expand_macros (FILE* f)
 
 /* guile: clear do not print list */
 
-#name=printall@
-#argnum=0@
-##gfunc~$ ()
+
+
+  SCM
+  guile_printall ()
 {
   dnp = realloc(dnp, sizeof(char));
   dnp[0] = '\0';
@@ -384,18 +377,20 @@ expand_macros (FILE* f)
 /* guile: start a definition section by adding \n to do not print
    list */
 
-#name=defsec@
-#argnum=0@
-##gfunc~$ ()
+
+
+  SCM
+  guile_defsec ()
 {
   add_to_dnp('\n');
   return scm_from_locale_string("");
 }
 
 /* guile: source a macro file as if it was entered along with text */
-#name=source@
-#argnum=1@
-##gfunc~$ (SCM file)
+
+
+  SCM
+  guile_source (SCM file)
 {
   char* file_c = scm_to_locale_string(file);
   FILE* f = fopen(file_c, "r");
@@ -405,7 +400,17 @@ expand_macros (FILE* f)
   return scm_from_locale_string("");
 }
 
-##regbuild~$
+
+  void*
+  register_guile_functions (void* data)
+  {
+  scm_c_define_gsubr("add_to_dnp", 1, 0, 0, &guile_add_to_dnp);
+  scm_c_define_gsubr("printall", 0, 0, 0, &guile_printall);
+  scm_c_define_gsubr("defsec", 0, 0, 0, &guile_defsec);
+  scm_c_define_gsubr("source", 1, 0, 0, &guile_source);
+
+  return NULL;
+  }
 
 /* main program */
 int
