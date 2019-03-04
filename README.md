@@ -62,9 +62,39 @@ To build the library, type <code>make</code>.  You can change the default guile 
 
 <h2>Use Cases</h2>
 
-<p>mro can be used for the sorts of problem that m4 is used for, but it is much simpler.  I use it for my personal website (see the code at <a href="https://github.com/flynnzac/flynnzac.github.io">https://github.com/flynnzac/flynnzac.github.io</a> and the website at <a href="http://zflynn.com">http://zflynn.com</a>). I also use it in papers where there are a few parameters of interest that I save to some output files.  To prevent copying errors, I do something like (usually in a separate file "parameters.mro"):
+<p>mro can be used for the sorts of problem that m4 or the C pre-processor is used for, but it is simple and allows access to a full programming language if necessary.  I use it for my personal website -- see the code at <a href="https://github.com/flynnzac/flynnzac.github.io">https://github.com/flynnzac/flynnzac.github.io</a> and the website at <a href="http://zflynn.com">http://zflynn.com</a>.   I also use it in the source code for <code>mro</code>itself to generate some boilerplate code making some C functions callable from Scheme.</p>
 
-<p><code>#rho=#(... code to fetch rho parameter);@</code></p>
+<h3>Example: boilerplate code generation</h3>
+
+Define the macros:
+<pre>
+  <code>
+  #register=
+  void*
+  register_guile_functions (void* data)
+  {@
+  #gfunc=`#register##register~
+  scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~)`;''`@%
+  SCM
+  guile_#name~'@
+  #regbuild=`#register~
+
+  return NULL`;''`
+    }'@
+  </code>
+</pre>
+
+Then, can create guile functions like:
+<pre>
+  <code>
+    #name=source@
+    #argnum=1@
+    ##gfunc~$ (SCM file) { ... }
+  </code>
+</pre>
+
+After all the functions have been created, typing, <code>##regbuild~$</code> will write out the necessary <code>register_guile_functions</code> function.
+    
 
 <h3>Example: automatic section numbering</h3>
 
