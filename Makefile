@@ -1,4 +1,3 @@
-noprint=100
 page_buffer=10000
 page_stack=100
 page_macro=100
