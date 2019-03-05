@@ -16,12 +16,12 @@
    this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-`
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <libguile.h>
-'
+
 
 /* parser state */
 static int inquote = 0;
@@ -45,11 +45,7 @@ static char* dnp;
 static int n_dnp = 0;
 
 /* do not print functions/macros */
-#add_to_dnp=`
-  dnp = realloc(dnp, sizeof(char)*(n_dnp+1));
-  dnp[n_dnp] = #c~;
-  n_dnp++;'
-  @;
+;
 
 int
 check_dnp (int c)
@@ -121,7 +117,7 @@ output (int c)
     return;
   
   if (stack.n_buf == 0)
-    printf("`%'c", c);
+    printf("%c", c);
   else
     push_to_buffer(&stack.buf[stack.n_buf-1], c);
 }
@@ -175,7 +171,7 @@ look_up_name (const struct buffer name)
   return -1;
 }
 
-#popbuf=`#buf~=pop_buffer_stack(); null_terminate(#buf~);'@
+
 /* add macro given top two elements in buffer */
 void
 push_macro ()
@@ -185,8 +181,8 @@ push_macro ()
   struct buffer* value;
   struct buffer* name;
 
-  #buf=value@ ##popbuf~$;
-  #buf=name@ ##popbuf~$;
+   value=pop_buffer_stack(); null_terminate(value);;
+   name=pop_buffer_stack(); null_terminate(name);;
     
   loc = look_up_name(*name);
 
@@ -210,8 +206,8 @@ push_macro ()
 }
 
 
-#cmd=`if (stack.n_buf >= #stack_reqd~) { #logic~ } else output(c); break;'@
-#buf=buf@
+
+
 
 void
 expand_macros (FILE* f)
@@ -265,24 +261,26 @@ expand_macros (FILE* f)
               }
               break;
             case DEFINE:
-              #stack_reqd=2@
-              #logic=push_macro();@
-              ##cmd~$
+              
+              
+              if (stack.n_buf >= 2) { push_macro(); } else output(c); break;
 
             case REF:
-              #stack_reqd=1@
-              #logic=
-              ##popbuf~$;
+              
+              ;
+              if (stack.n_buf >= 1) { 
+              buf=pop_buffer_stack(); null_terminate(buf);;
               loc = look_up_name(*buf);
               if (loc >= 0)
                 for (i=0; i < strlen(m.table[loc].value); i++)
                   output(m.table[loc].value[i]);
-              @;
-              ##cmd~$
+               } else output(c); break;
             case CODE:
-              #stack_reqd=1@
-              #logic=
-              ##popbuf~$;
+              
+              ;
+	      
+              if (stack.n_buf >= 1) { 
+              buf=pop_buffer_stack(); null_terminate(buf);;
               guile_ret = scm_c_eval_string(buf->text);
               if (!scm_is_eq(guile_ret, SCM_UNSPECIFIED))
                 {
@@ -294,21 +292,19 @@ expand_macros (FILE* f)
                     output(guile_str[i]);
             
                   free(guile_str);
-                }@;
-	      
-              ##cmd~$;
+                } } else output(c); break;;
 		
             case EXPAND:
-              #stack_reqd=1@
-              #logic=
-              ##popbuf~$;
+              
+              ;
+
+              if (stack.n_buf >= 1) { 
+              buf=pop_buffer_stack(); null_terminate(buf);;
               f2 = fmemopen(buf->text, buf->size, "r");
               expand_macros(f2);
-              fclose(f2);@;
+              fclose(f2); } else output(c); break;
 
-              ##cmd~$
-
-            case '``'':
+            case '`':
               inquote = 1;
               break;
             case COMMENT_START:
@@ -327,36 +323,33 @@ expand_macros (FILE* f)
 
 /* define macros to add guile functions */
 
-#register=
-void*
-register_guile_functions (void* data)
-{@
-    #gfunc=`#register##register~
-    scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~);@%
-    SCM
-      guile_#name~'@
-      #regbuild=`#register~
 
-      return NULL;
-}'@;
+    
+      ;
 
 /* guile: add to do not print list */
 
-#name=add_to_dnp@
-#argnum=1@
-##gfunc~$ (SCM ch)
+
+
+    SCM
+      guile_add_to_dnp (SCM ch)
 {
   char* str = scm_to_locale_string(ch);
-  #c=str[0]@ ##add_to_dnp~$
+   
+  dnp = realloc(dnp, sizeof(char)*(n_dnp+1));
+  dnp[n_dnp] = str[0];
+  n_dnp++;
+  
   free(str);
   return scm_from_locale_string("");
 }
 
 /* guile: clear do not print list */
 
-#name=printall@
-#argnum=0@
-##gfunc~$ ()
+
+
+    SCM
+      guile_printall ()
 {
   dnp = realloc(dnp, sizeof(char));
   dnp[0] = '\0';
@@ -368,18 +361,24 @@ register_guile_functions (void* data)
 /* guile: start a definition section by adding \n to do not print
    list */
 
-#name=defsec@
-#argnum=0@
-##gfunc~$ ()
+
+
+    SCM
+      guile_defsec ()
 {
-  #c='\n'@ ##add_to_dnp~$
+   
+  dnp = realloc(dnp, sizeof(char)*(n_dnp+1));
+  dnp[n_dnp] = '\n';
+  n_dnp++;
+  
   return scm_from_locale_string("");
 }
 
 /* guile: source a macro file as if it was entered along with text */
-#name=source@
-#argnum=1@
-##gfunc~$ (SCM file)
+
+
+    SCM
+      guile_source (SCM file)
 {
   char* file_c = scm_to_locale_string(file);
   FILE* f = fopen(file_c, "r");
@@ -389,7 +388,17 @@ register_guile_functions (void* data)
   return scm_from_locale_string("");
 }
 
-##regbuild~$
+
+void*
+register_guile_functions (void* data)
+{
+    scm_c_define_gsubr("add_to_dnp", 1, 0, 0, &guile_add_to_dnp);
+    scm_c_define_gsubr("printall", 0, 0, 0, &guile_printall);
+    scm_c_define_gsubr("defsec", 0, 0, 0, &guile_defsec);
+    scm_c_define_gsubr("source", 1, 0, 0, &guile_source);
+
+      return NULL;
+}
 
 /* main program */
 int

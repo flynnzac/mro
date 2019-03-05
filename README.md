@@ -1,7 +1,7 @@
 <h1>mro</h1>
 stack-based macro processor extensible with guile
 
-<p>The mro program processes macros.  It can also execute Guile Scheme code and insert the value that code returns into the text. The <code>mro</code> program is based on a simple stack-based macro language.  It has seven basic commands and is less than 300 lines of code.</p>
+<p>The mro program processes macros.  It can also execute Guile Scheme code and insert the value that code returns into the text. The <code>mro</code> program is based on a simple stack-based macro language.  It has seven basic commands and is less than 500 lines of code.</p>
 
 <p>All of the program's commands are single characters.  The default command characters are well-suited to producing Tex files and HTML files which is mostly what I use the program for.  These characters can be changed by providing options to the <code>make</code> command.</p>
 
@@ -43,9 +43,9 @@ To build the library, type <code>make</code>.  You can change the default guile 
 
 <li> % comments out the rest of the line
 
-<li> ; executes the Guile Scheme on the top of the stack.  For example,
+<li> | executes the Guile Scheme on the top of the stack.  For example,
 
-<p><code>#(+ 1 2);</code>
+<p><code>#(+ 1 2)|</code>
 
 <p>would print "3" to the buffer below it.
   
@@ -62,15 +62,45 @@ To build the library, type <code>make</code>.  You can change the default guile 
 
 <h2>Use Cases</h2>
 
-<p>mro can be used for the sorts of problem that m4 is used for, but it is much simpler.  I use it for my personal website (see the code at <a href="https://github.com/flynnzac/flynnzac.github.io">https://github.com/flynnzac/flynnzac.github.io</a> and the website at <a href="http://zflynn.com">http://zflynn.com</a>). I also use it in papers where there are a few parameters of interest that I save to some output files.  To prevent copying errors, I do something like (usually in a separate file "parameters.mro"):
+<p>mro can be used for the sorts of problem that m4 or the C pre-processor is used for, but it is simple and allows access to a full programming language if necessary.  I use it for my personal website -- see the code at <a href="https://github.com/flynnzac/flynnzac.github.io">https://github.com/flynnzac/flynnzac.github.io</a> and the website at <a href="http://zflynn.com">http://zflynn.com</a>.   I also use it in the source code for <code>mro</code>itself to generate boilerplate code making C functions callable from Scheme.</p>
 
-<p><code>#rho=#(... code to fetch rho parameter);@</code></p>
+<h3>Example: boilerplate code generation</h3>
+
+Define the macros:
+<pre>
+  <code>
+  #register=
+  void*
+  register_guile_functions (void* data)
+  {@
+  #gfunc=`#register##register~
+  scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~);@%
+  SCM
+  guile_#name~'@
+  #regbuild=`#register~
+
+  return NULL;
+  }'@
+  </code>
+</pre>
+
+Then, can create guile functions like:
+<pre>
+  <code>
+    #name=source@
+    #argnum=1@
+    ##gfunc~$ (SCM file) { ... }
+  </code>
+</pre>
+
+After all the functions have been created, typing, <code>##regbuild~$</code> will write out the necessary <code>register_guile_functions</code> function.
+    
 
 <h3>Example: automatic section numbering</h3>
 
 <pre>
 <code>#i=1@%
-#sec=`Section #i~#i##(+ #i~ 1);@'@%
+#sec=`Section #i~#i##(+ #i~ 1)|@'@%
 ##sec~$
 ##sec~$
 </code>
@@ -83,8 +113,8 @@ The code above would print out Section 1 and then Section 2 and so on.
 The following are built-in scheme commands available:
 
 <ul>
-  <li> <code>#(source "file.mro");</code> treats the file as if it were included in the text.
-  <li> <code>#(add-to-dnp "\n");</code> ignores newlines in all subsequent code.  Replace "\n" with other characters to ignore those.
-  <li> <code>#(printall);</code> removes all characters from the do-not-print list that were added with <code>add-to-dnp</code>
+  <li> <code>#(source "file.mro")|</code> treats the file as if it were included in the text.
+  <li> <code>#(add_to_dnp "\n")|</code> ignores newlines in all subsequent code.  Replace "\n" with other characters to ignore those.
+  <li> <code>#(printall)|</code> removes all characters from the do-not-print list that were added with <code>add-to-dnp</code>
 </ul>
 
