@@ -1,5 +1,5 @@
 /* 
-   mro - a simple macro expander extendable with Guile Scheme
+   mro - a stack-based macro expander extendable with Guile Scheme
 
    Copyright Zach Flynn <zlflynn@gmail.com>
 
@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <libguile.h>
-
+;
 
 /* parser state */
 static int inquote = 0;
@@ -128,8 +128,6 @@ null_terminate (struct buffer* b)
 }
 
 /* clean up macro table */
-
-
 void
 free_macro_table ()
 {
@@ -204,6 +202,8 @@ push_macro ()
 
 
 
+
+/* expands macros from a file stream */
 void
 expand_macros (FILE* f)
 {
@@ -222,7 +222,7 @@ expand_macros (FILE* f)
           if (c == '\'')
             inquote = 0;
           else
-            output(c);
+	    output(c);
         }
       else if (incomment)
         {
@@ -236,7 +236,7 @@ expand_macros (FILE* f)
             case PUSH2:
               if (stack.level != 1)
                 {
-                  output(c);
+		  output(c);
                   break;
                 }
             case PUSH:
@@ -258,8 +258,7 @@ expand_macros (FILE* f)
             case DEFINE:
               
               
-              if (stack.level >= 2) { push_macro(); } else output(c); break;
-
+              if (stack.level >= 2) { push_macro(); } else { output(c); } break;;
             case REF:
               
               ;
@@ -269,7 +268,7 @@ expand_macros (FILE* f)
               if (loc >= 0)
                 for (i=0; i < strlen(m.table[loc].value); i++)
                   output(m.table[loc].value[i]);
-               } else output(c); break;
+               } else { output(c); } break;;
             case CODE:
               
               ;
@@ -287,18 +286,15 @@ expand_macros (FILE* f)
                     output(guile_str[i]);
             
                   free(guile_str);
-                } } else output(c); break;;
-		
+                } } else { output(c); } break;;
             case EXPAND:
               
               ;
-
               if (stack.level >= 1) { 
               buf=pop_buffer_stack(); null_terminate(buf);;
               f2 = fmemopen(buf->text, buf->size, "r");
               expand_macros(f2);
-              fclose(f2); } else output(c); break;
-
+              fclose(f2); } else { output(c); } break;;
             case '`':
               inquote = 1;
               break;
@@ -306,18 +302,14 @@ expand_macros (FILE* f)
               incomment = 1;
               break;
             default:
-              output(c);
+	      output(c);
               break;
             }
         }
-
     }
-
-  
 }
 
 /* define macros to add guile functions */
-
 
     
       ;
