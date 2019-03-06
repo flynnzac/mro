@@ -1,5 +1,5 @@
 /* 
-   mro - a simple macro expander extendable with Guile Scheme
+   mro - a stack-based macro expander extendable with Guile Scheme
 
    Copyright Zach Flynn <zlflynn@gmail.com>
 
@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <libguile.h>
-'
+';
 
 /* parser state */
 static int inquote = 0;
@@ -29,7 +29,7 @@ static int incomment = 0;
 
 /* buffer stack */
 struct buffer { char* text; int location; int size; };
-struct buffer_stack { struct buffer* buf; int n_buf; int n_pages; };
+struct buffer_stack { struct buffer* buf; int level; int n_pages; };
 
 static struct buffer_stack stack;
 
@@ -45,10 +45,10 @@ static int n_dnp = 0;
 
 /* do not print functions/macros */
 #add_to_dnp=`
-  dnp = realloc(dnp, sizeof(char)*(n_dnp+1));
-  dnp[n_dnp] = #c~;
-  n_dnp++;'
-  @;
+dnp = realloc(dnp, sizeof(char)*(n_dnp+1));
+dnp[n_dnp] = #c~;
+n_dnp++;'
+@;
 
 int
 check_dnp (int c)
@@ -63,16 +63,14 @@ check_dnp (int c)
 }
 
 /* pops buffer off stack */
-
 struct buffer*
 pop_buffer_stack ()
 {
-  stack.n_buf--;
-  return &stack.buf[stack.n_buf];
+  stack.level--;
+  return &stack.buf[stack.level];
 }
 
 /* writes character to buffer */
-
 void
 push_to_buffer (struct buffer* b, int c)
 {
@@ -97,36 +95,34 @@ init_buffer (struct buffer* b)
 }
 
 /* copy buffer to string */
-
-void
-copy_from_buffer (struct buffer* src, char** dest)
+char*
+copy_from_buffer (struct buffer* src)
 {
   int i;
-  *dest = malloc(sizeof(char)*(src->location+1));
+  char* dest;
+  dest = malloc(sizeof(char)*(src->location+1));
   
   for (i=0; i < src->location; i++)
-    {
-      (*dest)[i] = src->text[i];
-    }
-  (*dest)[src->location] = '\0';
+    dest[i] = src->text[i];
+
+  dest[src->location] = '\0';
+  return dest;
 }
 
 /* pushes text to buffer or screen */
-
 void
 output (int c)
 {
   if (check_dnp(c))
     return;
   
-  if (stack.n_buf == 0)
+  if (stack.level == 0)
     printf("`%'c", c);
   else
-    push_to_buffer(&stack.buf[stack.n_buf-1], c);
+    push_to_buffer(&stack.buf[stack.level-1], c);
 }
 
 /* null terminate a buffer */
-
 void
 null_terminate (struct buffer* b)
 {
@@ -135,8 +131,6 @@ null_terminate (struct buffer* b)
 }
 
 /* clean up macro table */
-
-
 void
 free_macro_table ()
 {
@@ -155,9 +149,8 @@ free_stack ()
 {
   int i;
   for (i=0; i < (PAGE_STACK*stack.n_pages); i++)
-    {
-      free(stack.buf[i].text);
-    }
+    free(stack.buf[i].text);
+
   free(stack.buf);
 }
 
@@ -197,27 +190,26 @@ push_macro ()
           m.table = realloc(m.table,
                             sizeof(struct macro)*PAGE_MACRO*m.n_pages);
         }
-      copy_from_buffer(name, &(m.table[m.n_macros].name));
-      copy_from_buffer(value, &(m.table[m.n_macros].value));
+      m.table[m.n_macros].name = copy_from_buffer(name);
+      m.table[m.n_macros].value = copy_from_buffer(value);
       m.n_macros++;
     }
   else
     {
       free(m.table[loc].value);
-      copy_from_buffer(value, &(m.table[loc].value));
+      m.table[loc].value = copy_from_buffer(value);
     }
 }
 
-
-#cmd=`if (stack.n_buf >= #stack_reqd~) { #logic~ } else output(c); break;'@
+#default=output(c);@
+#cmd=`if (stack.level >= #stack_reqd~) { #logic~ } else { #default~ } break;'@
 #buf=buf@
 
+/* expands macros from a file stream */
 void
 expand_macros (FILE* f)
 {
-  int c;
-  int loc;
-  int i;
+  int i,c,loc;
   struct buffer* buf;
   char* guile_str;
   SCM guile_ret;
@@ -230,8 +222,8 @@ expand_macros (FILE* f)
           if (c == '\'')
             inquote = 0;
           else
-            output(c);
-        }
+            #default~
+            }
       else if (incomment)
         {
           if (c == COMMENT_END)
@@ -242,14 +234,14 @@ expand_macros (FILE* f)
           switch (c)
             {
             case PUSH2:
-              if (stack.n_buf != 1)
+              if (stack.level != 1)
                 {
-                  output(c);
+                  #default~
                   break;
                 }
             case PUSH:
               {
-                if (stack.n_buf >= (PAGE_STACK*stack.n_pages))
+                if (stack.level >= (PAGE_STACK*stack.n_pages))
                   {
                     stack.n_pages++;
                     stack.buf = realloc(stack.buf,
@@ -259,15 +251,14 @@ expand_macros (FILE* f)
                          i < (PAGE_STACK*stack.n_pages); i++)
                       init_buffer(stack.buf+i);
                   }
-                stack.buf[stack.n_buf].location = 0;
-                stack.n_buf++;
+                stack.buf[stack.level].location = 0;
+                stack.level++;
               }
               break;
             case DEFINE:
               #stack_reqd=2@
               #logic=push_macro();@
-              ##cmd~$
-
+              ##cmd~$;
             case REF:
               #stack_reqd=1@
               #logic=
@@ -277,7 +268,7 @@ expand_macros (FILE* f)
                 for (i=0; i < strlen(m.table[loc].value); i++)
                   output(m.table[loc].value[i]);
               @;
-              ##cmd~$
+              ##cmd~$;
             case CODE:
               #stack_reqd=1@
               #logic=
@@ -296,7 +287,6 @@ expand_macros (FILE* f)
                 }@;
 	      
               ##cmd~$;
-		
             case EXPAND:
               #stack_reqd=1@
               #logic=
@@ -304,9 +294,7 @@ expand_macros (FILE* f)
               f2 = fmemopen(buf->text, buf->size, "r");
               expand_macros(f2);
               fclose(f2);@;
-
-              ##cmd~$
-
+              ##cmd~$;
             case '``'':
               inquote = 1;
               break;
@@ -314,18 +302,14 @@ expand_macros (FILE* f)
               incomment = 1;
               break;
             default:
-              output(c);
+              #default~
               break;
             }
         }
-
     }
-
-  
 }
 
 /* define macros to add guile functions */
-
 #register=
 void*
 register_guile_functions (void* data)
@@ -396,7 +380,7 @@ main (int argc, char** argv)
 {
   int i;
 
-  stack.n_buf = 0;
+  stack.level = 0;
   stack.n_pages = 1;
   stack.buf = malloc(sizeof(struct buffer)*PAGE_STACK);
   for (i=0; i < PAGE_STACK; i++)

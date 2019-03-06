@@ -1,5 +1,5 @@
 /* 
-   mro - a simple macro expander extendable with Guile Scheme
+   mro - a stack-based macro expander extendable with Guile Scheme
 
    Copyright Zach Flynn <zlflynn@gmail.com>
 
@@ -21,16 +21,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <libguile.h>
-
+;
 
 /* parser state */
 static int inquote = 0;
 static int incomment = 0;
 
-
 /* buffer stack */
 struct buffer { char* text; int location; int size; };
-struct buffer_stack { struct buffer* buf; int n_buf; int n_pages; };
+struct buffer_stack { struct buffer* buf; int level; int n_pages; };
 
 static struct buffer_stack stack;
 
@@ -60,16 +59,14 @@ check_dnp (int c)
 }
 
 /* pops buffer off stack */
-
 struct buffer*
 pop_buffer_stack ()
 {
-  stack.n_buf--;
-  return &stack.buf[stack.n_buf];
+  stack.level--;
+  return &stack.buf[stack.level];
 }
 
 /* writes character to buffer */
-
 void
 push_to_buffer (struct buffer* b, int c)
 {
@@ -94,36 +91,34 @@ init_buffer (struct buffer* b)
 }
 
 /* copy buffer to string */
-
-void
-copy_from_buffer (struct buffer* src, char** dest)
+char*
+copy_from_buffer (struct buffer* src)
 {
   int i;
-  *dest = malloc(sizeof(char)*(src->location+1));
+  char* dest;
+  dest = malloc(sizeof(char)*(src->location+1));
   
   for (i=0; i < src->location; i++)
-    {
-      (*dest)[i] = src->text[i];
-    }
-  (*dest)[src->location] = '\0';
+    dest[i] = src->text[i];
+
+  dest[src->location] = '\0';
+  return dest;
 }
 
 /* pushes text to buffer or screen */
-
 void
 output (int c)
 {
   if (check_dnp(c))
     return;
   
-  if (stack.n_buf == 0)
+  if (stack.level == 0)
     printf("%c", c);
   else
-    push_to_buffer(&stack.buf[stack.n_buf-1], c);
+    push_to_buffer(&stack.buf[stack.level-1], c);
 }
 
 /* null terminate a buffer */
-
 void
 null_terminate (struct buffer* b)
 {
@@ -132,8 +127,6 @@ null_terminate (struct buffer* b)
 }
 
 /* clean up macro table */
-
-
 void
 free_macro_table ()
 {
@@ -152,9 +145,8 @@ free_stack ()
 {
   int i;
   for (i=0; i < (PAGE_STACK*stack.n_pages); i++)
-    {
-      free(stack.buf[i].text);
-    }
+    free(stack.buf[i].text);
+
   free(stack.buf);
 }
 
@@ -194,14 +186,14 @@ push_macro ()
           m.table = realloc(m.table,
                             sizeof(struct macro)*PAGE_MACRO*m.n_pages);
         }
-      copy_from_buffer(name, &(m.table[m.n_macros].name));
-      copy_from_buffer(value, &(m.table[m.n_macros].value));
+      m.table[m.n_macros].name = copy_from_buffer(name);
+      m.table[m.n_macros].value = copy_from_buffer(value);
       m.n_macros++;
     }
   else
     {
       free(m.table[loc].value);
-      copy_from_buffer(value, &(m.table[loc].value));
+      m.table[loc].value = copy_from_buffer(value);
     }
 }
 
@@ -209,12 +201,11 @@ push_macro ()
 
 
 
+/* expands macros from a file stream */
 void
 expand_macros (FILE* f)
 {
-  int c;
-  int loc;
-  int i;
+  int i,c,loc;
   struct buffer* buf;
   char* guile_str;
   SCM guile_ret;
@@ -228,7 +219,7 @@ expand_macros (FILE* f)
             inquote = 0;
           else
             output(c);
-        }
+            }
       else if (incomment)
         {
           if (c == COMMENT_END)
@@ -239,14 +230,14 @@ expand_macros (FILE* f)
           switch (c)
             {
             case PUSH2:
-              if (stack.n_buf != 1)
+              if (stack.level != 1)
                 {
                   output(c);
                   break;
                 }
             case PUSH:
               {
-                if (stack.n_buf >= (PAGE_STACK*stack.n_pages))
+                if (stack.level >= (PAGE_STACK*stack.n_pages))
                   {
                     stack.n_pages++;
                     stack.buf = realloc(stack.buf,
@@ -256,30 +247,29 @@ expand_macros (FILE* f)
                          i < (PAGE_STACK*stack.n_pages); i++)
                       init_buffer(stack.buf+i);
                   }
-                stack.buf[stack.n_buf].location = 0;
-                stack.n_buf++;
+                stack.buf[stack.level].location = 0;
+                stack.level++;
               }
               break;
             case DEFINE:
               
               
-              if (stack.n_buf >= 2) { push_macro(); } else output(c); break;
-
+              if (stack.level >= 2) { push_macro(); } else { output(c); } break;;
             case REF:
               
               ;
-              if (stack.n_buf >= 1) { 
+              if (stack.level >= 1) { 
               buf=pop_buffer_stack(); null_terminate(buf);;
               loc = look_up_name(*buf);
               if (loc >= 0)
                 for (i=0; i < strlen(m.table[loc].value); i++)
                   output(m.table[loc].value[i]);
-               } else output(c); break;
+               } else { output(c); } break;;
             case CODE:
               
               ;
 	      
-              if (stack.n_buf >= 1) { 
+              if (stack.level >= 1) { 
               buf=pop_buffer_stack(); null_terminate(buf);;
               guile_ret = scm_c_eval_string(buf->text);
               if (!scm_is_eq(guile_ret, SCM_UNSPECIFIED))
@@ -292,18 +282,15 @@ expand_macros (FILE* f)
                     output(guile_str[i]);
             
                   free(guile_str);
-                } } else output(c); break;;
-		
+                } } else { output(c); } break;;
             case EXPAND:
               
               ;
-
-              if (stack.n_buf >= 1) { 
+              if (stack.level >= 1) { 
               buf=pop_buffer_stack(); null_terminate(buf);;
               f2 = fmemopen(buf->text, buf->size, "r");
               expand_macros(f2);
-              fclose(f2); } else output(c); break;
-
+              fclose(f2); } else { output(c); } break;;
             case '`':
               inquote = 1;
               break;
@@ -315,14 +302,10 @@ expand_macros (FILE* f)
               break;
             }
         }
-
     }
-
-  
 }
 
 /* define macros to add guile functions */
-
 
     
       ;
@@ -336,10 +319,10 @@ expand_macros (FILE* f)
 {
   char* str = scm_to_locale_string(ch);
    
-  dnp = realloc(dnp, sizeof(char)*(n_dnp+1));
-  dnp[n_dnp] = str[0];
-  n_dnp++;
-  
+dnp = realloc(dnp, sizeof(char)*(n_dnp+1));
+dnp[n_dnp] = str[0];
+n_dnp++;
+
   free(str);
   return scm_from_locale_string("");
 }
@@ -367,10 +350,10 @@ expand_macros (FILE* f)
       guile_defsec ()
 {
    
-  dnp = realloc(dnp, sizeof(char)*(n_dnp+1));
-  dnp[n_dnp] = '\n';
-  n_dnp++;
-  
+dnp = realloc(dnp, sizeof(char)*(n_dnp+1));
+dnp[n_dnp] = '\n';
+n_dnp++;
+
   return scm_from_locale_string("");
 }
 
@@ -406,7 +389,7 @@ main (int argc, char** argv)
 {
   int i;
 
-  stack.n_buf = 0;
+  stack.level = 0;
   stack.n_pages = 1;
   stack.buf = malloc(sizeof(struct buffer)*PAGE_STACK);
   for (i=0; i < PAGE_STACK; i++)
