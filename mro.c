@@ -27,7 +27,6 @@
 static int inquote = 0;
 static int incomment = 0;
 
-
 /* buffer stack */
 struct buffer { char* text; int location; int size; };
 struct buffer_stack { struct buffer* buf; int n_buf; int n_pages; };
