@@ -43,9 +43,11 @@ To build the library, type <code>make</code>.  You can change the default guile 
 
 <li> % comments out the rest of the line
 
-<li> | executes the Guile Scheme on the top of the stack.  For example,
+<li> | executes the shell command on the top level of the stack if there is at least one buffer there and returns the output to the next level down on the stack.
 
-<p><code>#(+ 1 2)|</code>
+<li> ! executes the Guile Scheme on the top of the stack.  For example,
+
+<p><code>#(+ 1 2)!</code>
 
 <p>would print "3" to the buffer below it.
   
@@ -100,7 +102,7 @@ After all the functions have been created, typing, <code>##regbuild~$</code> wil
 
 <pre>
 <code>#i=1@%
-#sec=`Section #i~#i##(+ #i~ 1)|@'@%
+#sec=`Section #i~#i##(+ #i~ 1)!@'@%
 ##sec~$
 ##sec~$
 </code>
@@ -113,8 +115,8 @@ The code above would print out Section 1 and then Section 2 and so on.
 The following are built-in scheme commands available:
 
 <ul>
-  <li> <code>#(source "file.mro")|</code> treats the file as if it were included in the text.
-  <li> <code>#(add_to_dnp "\n")|</code> ignores newlines in all subsequent code.  Replace "\n" with other characters to ignore those.
-  <li> <code>#(printall)|</code> removes all characters from the do-not-print list that were added with <code>add-to-dnp</code>
+  <li> <code>#(source "file.mro")!</code> treats the file as if it were included in the text.
+  <li> <code>#(add_to_dnp "\n")!</code> ignores newlines in all subsequent code.  Replace "\n" with other characters to ignore those.
+  <li> <code>#(printall)!</code> removes all characters from the do-not-print list that were added with <code>add-to-dnp</code>
 </ul>
 

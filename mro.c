@@ -215,7 +215,7 @@ expand_macros (FILE* f)
   SCM guile_ret;
   FILE* f2;
 
-  while (((c = fgetc(f)) `!'= EOF) && c `!'= '\0')
+  while (((c = fgetc(f)) != EOF) && c != '\0')
     {
       if (inquote)
         {
@@ -234,7 +234,7 @@ expand_macros (FILE* f)
           switch (c)
             {
             case PUSH2:
-              if (stack.level `!'= 1)
+              if (stack.level != 1)
                 {
                   #default~
                   break;
