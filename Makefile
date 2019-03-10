@@ -3,7 +3,8 @@ page_stack=100
 page_macro=100
 
 define="'@'"
-code="'|'"
+code="'!'"
+shell="'|'"
 comment_start="'%'"
 comment_end="'\\n'"
 push = "'\#'"
@@ -18,6 +19,7 @@ mro: mro.expand.c expand
 	-DPAGE_MACRO=$(page_macro) \
 	-DPAGE_BUFFER=$(page_buffer) \
 	-DPAGE_STACK=$(page_stack)  \
+	-DSHELL=$(shell) \
 	-DDEFINE=$(define)  -DCOMMENT_START=$(comment_start) \
 	-DCOMMENT_END=$(comment_end) -DPUSH=$(push) -DPUSH2=$(push2) \
 	-DREF=$(ref) -DCODE=$(code) -DEXPAND=$(expand)  -Wall

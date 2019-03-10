@@ -291,6 +291,15 @@ expand_macros (FILE* f)
               f2 = fmemopen(buf->text, buf->size, "r");
               expand_macros(f2);
               fclose(f2); } else { output(c); } break;;
+            case SHELL:
+              
+              ;
+              if (stack.level >= 1) { 
+              buf=pop_buffer_stack(); null_terminate(buf);;
+              f2 = popen(buf->text, "r");
+              while (((c=fgetc(f2)) != EOF) && c != '\0')
+                  output(c);
+              pclose(f2); } else { output(c); } break;;
             case '`':
               inquote = 1;
               break;

@@ -215,7 +215,7 @@ expand_macros (FILE* f)
   SCM guile_ret;
   FILE* f2;
 
-  while (((c = fgetc(f)) != EOF) && c != '\0')
+  while (((c = fgetc(f)) `!'= EOF) && c `!'= '\0')
     {
       if (inquote)
         {
@@ -234,7 +234,7 @@ expand_macros (FILE* f)
           switch (c)
             {
             case PUSH2:
-              if (stack.level != 1)
+              if (stack.level `!'= 1)
                 {
                   #default~
                   break;
@@ -274,7 +274,7 @@ expand_macros (FILE* f)
               #logic=
               ##popbuf~$;
               guile_ret = scm_c_eval_string(buf->text);
-              if (!scm_is_eq(guile_ret, SCM_UNSPECIFIED))
+              if (`!'scm_is_eq(guile_ret, SCM_UNSPECIFIED))
                 {
                   guile_str = scm_to_locale_string
                     (scm_object_to_string
@@ -294,6 +294,15 @@ expand_macros (FILE* f)
               f2 = fmemopen(buf->text, buf->size, "r");
               expand_macros(f2);
               fclose(f2);@;
+              ##cmd~$;
+            case SHELL:
+              #stack_reqd=1@
+              #logic=
+              ##popbuf~$;
+              f2 = popen(buf->text, "r");
+              while (((c=fgetc(f2)) `!'= EOF) && c `!'= '\0')
+                  output(c);
+              pclose(f2);@;
               ##cmd~$;
             case '``'':
               inquote = 1;
