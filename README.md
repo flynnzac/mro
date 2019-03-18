@@ -1,122 +1,311 @@
-<h1>mro</h1>
-stack-based macro processor extensible with guile
+<!-- Creator     : groff version 1.22.3 -->
+<!-- CreationDate: Mon Mar 18 11:50:22 2019 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>mro</title>
 
-<p>The mro program processes macros.  It can also execute Guile Scheme code and insert the value that code returns into the text. The <code>mro</code> program is based on a simple stack-based macro language.  It has seven basic commands and is less than 500 lines of code.</p>
+</head>
+<body>
 
-<p>All of the program's commands are single characters.  The default command characters are well-suited to producing Tex files and HTML files which is mostly what I use the program for.  These characters can be changed by providing options to the <code>make</code> command.</p>
+<h1 align="center">mro</h1>
 
-<p>The program reads macros from standard input and writes to standard output, so the usual command for executing <code>mro</code> is:</p>
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#COMMANDS">COMMANDS</a><br>
+<a href="#GUILE FUNCTIONS">GUILE FUNCTIONS</a><br>
+<a href="#EXAMPLES">EXAMPLES</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+<a href="#BUGS">BUGS</a><br>
+<a href="#AUTHOR">AUTHOR</a><br>
 
-<p><code>cat file.mro.html | mro > file.html</code></p>
+<hr>
 
-<h2>Installation</h2>
 
-<code>mro</code> depends on guile and the standard C library.  I made no effort to avoid using GNU C library-specific features so the program might use those.
+<h2>NAME
+<a name="NAME"></a>
+</h2>
 
-To build the library, type <code>make</code>.  You can change the default guile include and linking expressions by setting the <code>guile_lib</code> and <code>guile_include</code> variables.
 
-<h2>Commands</h2>
-<code>mro</code> has the following commands:
+<p style="margin-left:11%; margin-top: 1em">mro &minus; a
+stack-based macro processor that can form macros based on
+results returned by scheme functions</p>
 
-<ul>
-<li> # is the default PUSH command.  It sets the buffer that the text is written to be the next level up.  For example, in the text
+<h2>SYNOPSIS
+<a name="SYNOPSIS"></a>
+</h2>
 
-<p><code>the quick brown fox # runs </code>
 
-<p>"the quick brown fox" is written out and " runs" is written to the next buffer up
+<p style="margin-left:11%; margin-top: 1em"><b>mro</b></p>
 
-<li> = is the default PUSH2 command.  It can be used to PUSH if there is exactly one layer to the stack (i.e. it can be used if one and only PUSH command has been used before). Otherwise, it is treated like normal text.  It never has to be used, but it can make macro definitions more readable.
+<h2>DESCRIPTION
+<a name="DESCRIPTION"></a>
+</h2>
 
-<li> @ is the default DEFINE command.  It pops the top two buffers and binds the value in the top buffer to the name in the second from the top buffer. Like so:
 
-<p><code>#username=flynnzac@</code>
+<p style="margin-left:11%; margin-top: 1em"><b>mro</b> is a
+stack-based macro processor. It reads from standard input,
+evaluates the macros provided to standard input, and writes
+the processed text to standard output. The macros can be
+constructed by evaluating Guile Scheme code. The macro
+language is parsed by reading one character at a time from
+left to right in a single pass.</p>
 
-<p>defines the macro "username" and binds the value "flynnzac" to it.
+<p style="margin-left:11%; margin-top: 1em">The macro
+language is centered around a stack. When you are on the
+bottom of the stack, characters typed in are echoed to
+standard output until a command is reached. You can move up
+a level in the stack by using the PUSH command (by default:
+#). Text you enter at higher levels of the stack will not be
+put to standard output but can be accessed by <b>mro</b>
+commands.</p>
 
-<li> ~ is the default REFERENCE command.  It pops the top element on the stack, reads it, and looks up the macro. It then replaces the text on the next lowest buffer in the stack with the macro's value.  Like so:
+<p style="margin-left:11%; margin-top: 1em">Macro
+processing languages are used for text generation whether
+that text is code, a website, or writing.</p>
 
-<p><code>#username~</code>
+<h2>COMMANDS
+<a name="COMMANDS"></a>
+</h2>
 
-<p>prints the value of the macro `username` (from above: "flynnzac").
-    
-<li> `TEXT' quotes TEXT and prints it literally, no matter what it contains.  It is the way to escape special characters.
 
-<li> % comments out the rest of the line
+<p style="margin-left:11%; margin-top: 1em">The following
+are the <b>mro</b> commands</p>
 
-<li> | executes the shell command on the top level of the stack if there is at least one buffer there and returns the output to the next level down on the stack.
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="1%">
 
-<li> ! executes the Guile Scheme on the top of the stack.  For example,
 
-<p><code>#(+ 1 2)!</code>
+<p><b>#</b></p></td>
+<td width="10%"></td>
+<td width="78%">
 
-<p>would print "3" to the buffer below it.
-  
-<li> $ expands the macros in the top of the stock if there is anything on the stack.  For example,
-    
-<p><code>#code=number`#i~'@</code>
-<p><code>#i=1@</code>
-<p><code>##code~$</code>
-<p><code>#i=2@</code>
-<p><code>##code~$</code>
 
-<p> Would print out two lines.  The first would be "number1" and the second would be "number2".
-</ul>
+<p>PUSH command. All text written after the command is the
+next level up on the stack.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="1%">
 
-<h2>Use Cases</h2>
 
-<p>mro can be used for the sorts of problem that m4 or the C pre-processor is used for, but it is simple and allows access to a full programming language if necessary.  I use it for my personal website -- see the code at <a href="https://github.com/flynnzac/flynnzac.github.io">https://github.com/flynnzac/flynnzac.github.io</a> and the website at <a href="http://zflynn.com">http://zflynn.com</a>.   I also use it in the source code for <code>mro</code>itself to generate boilerplate code making C functions callable from Scheme.  It can be used in this way to do meta-programming.</p>
+<p><b>@</b></p></td>
+<td width="10%"></td>
+<td width="78%">
 
-<h3>Example: boilerplate code generation</h3>
 
-Define the macros:
-<pre>
-  <code>
-  #register=
-  void*
-  register_guile_functions (void* data)
-  {@
-  #gfunc=`#register##register~
-  scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~);@%
-  SCM
-  guile_#name~'@
-  #regbuild=`#register~
+<p>DEFINE command. Pops the text off the top two levels of
+the stack and assigns the text at the top of the text to the
+macro name at the second level from the top.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="1%">
 
-  return NULL;
-  }'@
-  </code>
-</pre>
 
-Then, can create guile functions like:
-<pre>
-  <code>
-    #name=source@
-    #argnum=1@
-    ##gfunc~$ (SCM file) { ... }
-  </code>
-</pre>
+<p><b>~</b></p></td>
+<td width="10%"></td>
+<td width="78%">
 
-After all the functions have been created, typing, <code>##regbuild~$</code> will write out the necessary <code>register_guile_functions</code> function.
-    
 
-<h3>Example: automatic section numbering</h3>
+<p>REFERENCE command. Pops the text from the top of the
+stack, looks up the name of the macro specified there, and
+puts that text&rsquo;s value to the next level down in the
+stack.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="1%">
 
-<pre>
-<code>#i=1@%
-#sec=`Section #i~#i##(+ #i~ 1)!@'@%
-##sec~$
-##sec~$
-</code>
-</pre>
 
-The code above would print out Section 1 and then Section 2 and so on.
+<p><b>$</b></p></td>
+<td width="10%"></td>
+<td width="78%">
 
-<h2>Built-in Scheme commands</h2>
 
-The following are built-in scheme commands available:
+<p>EXPAND command. Expands the macros in the text on the
+top level of the stack.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="1%">
 
-<ul>
-  <li> <code>#(source "file.mro")!</code> treats the file as if it were included in the text.
-  <li> <code>#(add_to_dnp "\n")!</code> ignores newlines in all subsequent code.  Replace "\n" with other characters to ignore those.
-  <li> <code>#(printall)!</code> removes all characters from the do-not-print list that were added with <code>add-to-dnp</code>
-</ul>
 
+<p><b>|</b></p></td>
+<td width="10%"></td>
+<td width="78%">
+
+
+<p>SHELL command. Evalutes the text on the top level of the
+stack as a shell command, and outputs the output of the
+command to the next level down on the stack.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="1%">
+
+
+<p><b>!</b></p></td>
+<td width="10%"></td>
+<td width="78%">
+
+
+<p>CODE command. Evaluates the text on the top level of the
+stack as Guile Scheme code, converts the result to a string
+using Guile&rsquo;s</p></td></tr>
+</table>
+
+<p style="margin-left:22%; margin-top: 1em"><b>display</b>
+function, and puts the text to the next buffer down in the
+stack.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="9%">
+
+
+<p style="margin-top: 1em"><b>&rsquo;=&rsquo;</b></p></td>
+<td width="2%"></td>
+<td width="78%">
+
+
+<p style="margin-top: 1em">PUSH2 command.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="9%">
+
+
+<p><b>%</b></p></td>
+<td width="2%"></td>
+<td width="78%">
+
+
+<p>COMMENT. Ignore any text following the command until a
+newline character is reached.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="9%">
+
+
+<p><b>&lsquo;text&rsquo;</b></p></td>
+<td width="2%"></td>
+<td width="78%">
+
+
+<p>QUOTE text. Put the literal text to the current level of
+the stack. This is how you escape the command
+characters.</p> </td></tr>
+</table>
+
+<h2>GUILE FUNCTIONS
+<a name="GUILE FUNCTIONS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The following
+Guile functions are built into <b>mro <br>
+(source filename)</b></p>
+
+<p style="margin-left:22%;">treats the file as if it were
+actually written to standard input. In other words,
+<b>mro</b> <br>
+parses the contents of the file. To include the file without
+parsing it, use <b>#cat filename|.</b></p>
+
+<p style="margin-left:11%;"><b>(add_to_dnp char)</b></p>
+
+<p style="margin-left:22%;">adds the character to the
+&quot;do not print list&quot;. <b>mro</b> will ignore this
+character while parsing.</p>
+
+<p style="margin-left:11%;"><b>(printall)</b></p>
+
+<p style="margin-left:22%;">removes all characters from the
+&quot;do not print list&quot;.</p>
+
+<h2>EXAMPLES
+<a name="EXAMPLES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>Section
+counter</b> <br>
+The <b>mro</b> commands in</p>
+
+<p style="margin-left:22%;">#i=1@% <br>
+#sec=&lsquo;Section #i~#i##(+ #i~ 1);@&rsquo;@% <br>
+##sec~$ <br>
+##sec~$</p>
+
+<p style="margin-left:11%;">are expanded to</p>
+
+<p style="margin-left:22%;">Section 1 <br>
+Section 2</p>
+
+<p style="margin-left:11%;"><b>Boilerplate Guile Code in
+mro itself</b></p>
+
+<p style="margin-left:11%; margin-top: 1em">Guile functions
+in C have to be registered. <b>mro</b> makes this process
+easy to generate. It uses these macros in its own
+source.</p>
+
+<p style="margin-left:22%;">#register= <br>
+void* <br>
+register_guile_functions (void* data) <br>
+{@ <br>
+#gfunc=&lsquo;#register##register~ <br>
+scm_c_define_gsubr(&quot;#name~&quot;, #argnum~, 0, 0,
+&amp;guile_#name~);@% <br>
+SCM <br>
+guile_#name~&rsquo;@ <br>
+#regbuild=&lsquo;#register~ <br>
+return NULL; <br>
+}&rsquo;@</p>
+
+<p style="margin-left:11%; margin-top: 1em">Then, we can
+create guile functions like:</p>
+
+<p style="margin-left:22%;">#name=source@ <br>
+#argnum=1@ <br>
+##gfunc~$ (SCM file) { ... }</p>
+
+<p style="margin-left:11%; margin-top: 1em">And then type
+<b>##regbuild~$</b> to output the
+<b>register_guile_functions</b> function that can be used
+with Guile&rsquo;s <b>scm_with_guile</b> function.</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+<h2>BUGS
+<a name="BUGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Please report
+as an issue to https://github.com/flynnzac/mro</p>
+
+<h2>AUTHOR
+<a name="AUTHOR"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Zach Flynn
+&lt;zlflynn@gmail.com&gt; 0.0.1</p>
+<hr>
+</body>
+</html>

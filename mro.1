@@ -13,6 +13,9 @@ The macro language is centered around a stack.  When you are on the bottom of th
 .B mro
 commands.
 
+.LP
+Macro processing languages are used for text generation whether that text is code, a website, or writing.
+
 .SH COMMANDS
 
 The following are the 
@@ -49,6 +52,26 @@ COMMENT.  Ignore any text following the command until a newline character is rea
 .BR `text'
 QUOTE text.  Put the literal text to the current level of the stack.  This is how you escape the command characters.
 
+.SH "GUILE FUNCTIONS"
+.LP
+The following Guile functions are built into 
+.B mro
+.
+
+.TP
+.BR "(source filename)"
+treats the file as if it were actually written to standard input.  In other words, 
+.B mro
+ parses the contents of the file.  To include the file without parsing it, use
+.B "#cat filename|."
+.TP
+.BR "(add_to_dnp char)"
+adds the character to the "do not print list". 
+.B mro
+will ignore this character while parsing.
+.TP
+.BR "(printall)"
+removes all characters from the "do not print list".
 .SH EXAMPLES
 .LP
 .BR "Section counter"
@@ -71,6 +94,52 @@ Section 1
 .br
 Section 2
 .RE
+.BR "Boilerplate Guile Code in mro itself"
+
+Guile functions in C have to be registered. 
+.B mro
+makes this process easy to generate.  It uses these macros in its own source.
+.RS
+  #register=
+.br
+  void*
+.br
+  register_guile_functions (void* data)
+.br  
+  {@
+.br  
+  #gfunc=`#register##register~
+.br  
+  scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~);@%
+.br
+  SCM
+.br
+  guile_#name~'@
+.br  
+  #regbuild=`#register~
+.br  
+.br
+  return NULL;
+.br  
+  }'@
+.RE
+
+Then, we can create guile functions like:
+.RS
+    #name=source@
+.br
+    #argnum=1@
+.br    
+    ##gfunc~$ (SCM file) { ... }
+.RE
+
+And then type
+.B "##regbuild~$"
+to output the
+.B register_guile_functions
+function that can be used with Guile's
+.B scm_with_guile
+function.
 .SH "SEE ALSO"
 .SH BUGS
 .TP

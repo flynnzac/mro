@@ -30,9 +30,9 @@ expand: mro.c
 clean: mro
 	rm mro.expand.c
 
-doc: README.mro.html
-	cat README.mro.html | mro > README.md
+doc: mro.mro.1
 	cat mro.mro.1 | mro > mro.1
+	groff -mandoc -Thtml mro.1 > README.md
 
 install: mro
 	cp mro /usr/local/bin/
