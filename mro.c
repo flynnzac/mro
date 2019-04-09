@@ -229,11 +229,8 @@ expand_macros (FILE* f)
     {
       if (inquote)
         {
-          if (c == '\'')
-            inquote = 0;
-          else
-            #default~
-            }
+          if (c == '\'') inquote = 0; else #default~;
+	}
       else if (incomment)
         {
           if (c == COMMENT_END)
@@ -311,7 +308,7 @@ expand_macros (FILE* f)
               ##popbuf~$;
               f2 = popen(buf->text, "r");
               while (((c=fgetc(f2)) `!'= EOF) && c `!'= '\0')
-                  output(c);
+		output(c);
               pclose(f2);@;
               ##cmd~$;
             case '``'':
