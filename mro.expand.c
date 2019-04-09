@@ -152,15 +152,41 @@ free_stack ()
 
 /* look up macro name */
 int
-look_up_name (const struct buffer name)
+look_up_name (char* name)
 {
   int i;
 
   for (i = 0; i < m.n_macros; i++)
-    if (strcmp(m.table[i].name, name.text)==0)
+    if (strcmp(m.table[i].name, name)==0)
       return i;
 
   return -1;
+}
+
+/* add macro to table */
+void
+add_macro_to_table (char* name, char* value)
+{
+  int loc;
+  loc = look_up_name(name);
+  if (loc < 0)
+    {
+      if (m.n_macros >= (PAGE_MACRO*m.n_pages))
+	{
+	  m.n_pages++;
+	  m.table = realloc(m.table,
+			    sizeof(struct macro)*PAGE_MACRO*m.n_pages);
+	}
+      m.table[m.n_macros].name = name;
+      m.table[m.n_macros].value = value;
+      m.n_macros++;
+    }
+  else
+    {
+      free(m.table[loc].value);
+      free(name);
+      m.table[loc].value = value;
+    }
 }
 
 
@@ -175,26 +201,10 @@ push_macro ()
 
    value=pop_buffer_stack(); null_terminate(value);;
    name=pop_buffer_stack(); null_terminate(name);;
-    
-  loc = look_up_name(*name);
 
-  if (loc < 0)
-    {
-      if (m.n_macros >= (PAGE_MACRO*m.n_pages))
-        {
-          m.n_pages++;
-          m.table = realloc(m.table,
-                            sizeof(struct macro)*PAGE_MACRO*m.n_pages);
-        }
-      m.table[m.n_macros].name = copy_from_buffer(name);
-      m.table[m.n_macros].value = copy_from_buffer(value);
-      m.n_macros++;
-    }
-  else
-    {
-      free(m.table[loc].value);
-      m.table[loc].value = copy_from_buffer(value);
-    }
+  add_macro_to_table(copy_from_buffer(name),
+		     copy_from_buffer(value));
+  
 }
 
 
@@ -260,7 +270,7 @@ expand_macros (FILE* f)
               ;
               if (stack.level >= 1) { 
               buf=pop_buffer_stack(); null_terminate(buf);;
-              loc = look_up_name(*buf);
+              loc = look_up_name(buf->text);
               if (loc >= 0)
                 for (i=0; i < strlen(m.table[loc].value); i++)
                   output(m.table[loc].value[i]);
@@ -397,6 +407,11 @@ int
 main (int argc, char** argv)
 {
   int i;
+  int sz;
+  char* val;
+  char* num;
+  
+  FILE* f;
 
   stack.level = 0;
   stack.n_pages = 1;
@@ -412,7 +427,19 @@ main (int argc, char** argv)
   dnp[0] = '\0';
   n_dnp = 1;
   scm_with_guile(&register_guile_functions, NULL);
-  
+
+  /* expand , , ... to the command line args */
+  for (i=1; i < argc; i++)
+    {
+      num = malloc(sizeof(char)*((i / 10) + 1+1));
+      sprintf(num, "%d", i-1);
+
+      val = malloc(sizeof(char)*(strlen(argv[i])+1));
+      strcpy(val, argv[i]);
+      
+      add_macro_to_table(num,val);
+    }
+
   expand_macros(stdin);
 
   free_stack();
