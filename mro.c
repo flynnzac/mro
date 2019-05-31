@@ -199,7 +199,6 @@ void
 push_macro ()
 
 {
-  int loc;
   struct buffer* value;
   struct buffer* name;
 
@@ -395,12 +394,9 @@ int
 main (int argc, char** argv)
 {
   int i;
-  int sz;
   char* val;
   char* num;
   
-  FILE* f;
-
   stack.level = 0;
   stack.n_pages = 1;
   stack.buf = malloc(sizeof(struct buffer)*PAGE_STACK);
