@@ -195,7 +195,6 @@ void
 push_macro ()
 
 {
-  int loc;
   struct buffer* value;
   struct buffer* name;
 
@@ -225,11 +224,8 @@ expand_macros (FILE* f)
     {
       if (inquote)
         {
-          if (c == '\'')
-            inquote = 0;
-          else
-            output(c);
-            }
+          if (c == '\'') inquote = 0; else output(c);;
+	}
       else if (incomment)
         {
           if (c == COMMENT_END)
@@ -308,7 +304,7 @@ expand_macros (FILE* f)
               buf=pop_buffer_stack(); null_terminate(buf);;
               f2 = popen(buf->text, "r");
               while (((c=fgetc(f2)) != EOF) && c != '\0')
-                  output(c);
+		output(c);
               pclose(f2); } else { output(c); } break;;
             case '`':
               inquote = 1;
@@ -407,12 +403,9 @@ int
 main (int argc, char** argv)
 {
   int i;
-  int sz;
   char* val;
   char* num;
   
-  FILE* f;
-
   stack.level = 0;
   stack.n_pages = 1;
   stack.buf = malloc(sizeof(struct buffer)*PAGE_STACK);
