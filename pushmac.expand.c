@@ -1,5 +1,5 @@
 /* 
-   mro - a stack-based macro expander extendable with Guile Scheme
+   pushmac - a stack-based macro expander extendable with Guile Scheme
 
    Copyright Zach Flynn <zlflynn@gmail.com>
 
@@ -14,19 +14,6 @@
 
    You should have received a copy of the GNU General Public License along with
    this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
-
-/* syntax idea for "function call"
-   #x#y#f:
-   expands to "#1=x@#2=y@##f~$" on a separate stack.  The result is written back to the top of current stack.
-
-   Will need to switch from one macro_stack, one buffer_stack to global and function scope.  Keep the stacks completely separate.  No fall back to global.
-
-   "function definition" is current syntax:
-   
-   #f=`(+ #1~ #2~)'@
-   
 */
 
 
