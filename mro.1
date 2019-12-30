@@ -1,3 +1,5 @@
+%
+%
 .TH mro 1 2019-03-03 
 .SH NAME
 mro \- a stack-based macro processor that can form macros based on results returned by scheme functions
@@ -46,9 +48,6 @@ function, and puts the text to the next buffer down in the stack.
 .BR '='
 PUSH2 command. 
 .TP
-.BR %
-COMMENT.  Ignore any text following the command until a newline character is reached.
-.TP
 .BR `text'
 QUOTE text.  Put the literal text to the current level of the stack.  This is how you escape the command characters.
 
@@ -80,9 +79,9 @@ The
 .B mro
 commands in
 .RS
-#i=1@%
+#i=1@
 .br
-#sec=`Section #i~#i##(+ #i~ 1);@'@%
+#sec=`Section #i~#i##(+ #i~ 1);@'@
 .br
 ##sec~$
 .br
@@ -110,7 +109,7 @@ makes this process easy to generate.  It uses these macros in its own source.
 .br  
   #gfunc=`#register##register~
 .br  
-  scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~);@%
+  scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~);@
 .br
   SCM
 .br

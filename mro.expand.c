@@ -17,6 +17,19 @@
 */
 
 
+/* syntax idea for "function call"
+   #x#y#f:
+   expands to "#1=x@#2=y@##f~$" on a separate stack.  The result is written back to the top of current stack.
+
+   Will need to switch from one macro_stack, one buffer_stack to global and function scope.  Keep the stacks completely separate.  No fall back to global.
+
+   "function definition" is current syntax:
+   
+   #f=`(+ #1~ #2~)'@
+   
+*/
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -25,7 +38,6 @@
 
 /* parser state */
 static int inquote = 0;
-static int incomment = 0;
 
 /* buffer stack */
 struct buffer { char* text; int location; int size; };
@@ -226,11 +238,6 @@ expand_macros (FILE* f)
         {
           if (c == '\'') inquote = 0; else output(c);;
 	}
-      else if (incomment)
-        {
-          if (c == COMMENT_END)
-            incomment = 0;
-        }
       else
         {
           switch (c)
@@ -309,9 +316,6 @@ expand_macros (FILE* f)
             case '`':
               inquote = 1;
               break;
-            case COMMENT_START:
-              incomment = 1;
-              break;
             default:
               output(c);
               break;
@@ -326,6 +330,7 @@ expand_macros (FILE* f)
       ;
 
 /* guile: add to do not print list */
+
 
 
 
@@ -346,6 +351,7 @@ n_dnp++;
 
 
 
+
     SCM
       guile_printall ()
 {
@@ -361,6 +367,7 @@ n_dnp++;
 
 
 
+
     SCM
       guile_defsec ()
 {
@@ -373,6 +380,7 @@ n_dnp++;
 }
 
 /* guile: source a macro file as if it was entered along with text */
+
 
 
     SCM

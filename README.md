@@ -1,5 +1,5 @@
-<!-- Creator     : groff version 1.22.3 -->
-<!-- CreationDate: Mon Mar 18 12:04:20 2019 -->
+<!-- Creator     : groff version 1.22.4 -->
+<!-- CreationDate: Mon Dec 30 15:01:32 2019 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -32,6 +32,8 @@
 
 <hr>
 
+
+<p>% %</p>
 
 <h2>NAME
 <a name="NAME"></a>
@@ -186,18 +188,6 @@ stack.</p>
 <td width="9%">
 
 
-<p><b>%</b></p></td>
-<td width="2%"></td>
-<td width="78%">
-
-
-<p>COMMENT. Ignore any text following the command until a
-newline character is reached.</p></td></tr>
-<tr valign="top" align="left">
-<td width="11%"></td>
-<td width="9%">
-
-
 <p><b>&lsquo;text&rsquo;</b></p></td>
 <td width="2%"></td>
 <td width="78%">
@@ -243,8 +233,8 @@ character while parsing.</p>
 counter</b> <br>
 The <b>mro</b> commands in</p>
 
-<p style="margin-left:22%;">#i=1@% <br>
-#sec=&lsquo;Section #i~#i##(+ #i~ 1);@&rsquo;@% <br>
+<p style="margin-left:22%;">#i=1@ <br>
+#sec=&lsquo;Section #i~#i##(+ #i~ 1);@&rsquo;@ <br>
 ##sec~$ <br>
 ##sec~$</p>
 
@@ -267,7 +257,7 @@ register_guile_functions (void* data) <br>
 {@ <br>
 #gfunc=&lsquo;#register##register~ <br>
 scm_c_define_gsubr(&quot;#name~&quot;, #argnum~, 0, 0,
-&amp;guile_#name~);@% <br>
+&amp;guile_#name~);@ <br>
 SCM <br>
 guile_#name~&rsquo;@ <br>
 #regbuild=&lsquo;#register~ <br>

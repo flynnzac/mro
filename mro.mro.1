@@ -42,9 +42,6 @@ function, and puts the text to the next buffer down in the stack.
 .BR '='
 PUSH2 command. 
 .TP
-.BR `%'
-COMMENT.  Ignore any text following the command until a newline character is reached.
-.TP
 .BR ``text''
 QUOTE text.  Put the literal text to the current level of the stack.  This is how you escape the command characters.
 
@@ -68,9 +65,9 @@ removes all characters from the "do not print list".
 .br
 The #mro~commands in
 .RS
-`#i=1@%
+`#i=1@
 .br
-#sec=`Section #i~#i##(+ #i~ 1);@''`@%
+#sec=`Section #i~#i##(+ #i~ 1);@''`@
 .br
 ##sec~$
 .br
@@ -96,7 +93,7 @@ Guile functions in C have to be registered. #mro~makes this process easy to gene
 .br  
   #gfunc=`#register##register~
 .br  
-  scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~);@%
+  scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~);@
 .br
   SCM
 .br
