@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.4 -->
-<!-- CreationDate: Mon Dec 30 15:12:33 2019 -->
+<!-- CreationDate: Mon Dec 30 15:15:49 2019 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -32,8 +32,6 @@
 
 <hr>
 
-
-<p>% %</p>
 
 <h2>NAME
 <a name="NAME"></a>
