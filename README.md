@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.4 -->
-<!-- CreationDate: Mon Dec 30 15:01:32 2019 -->
+<!-- CreationDate: Mon Dec 30 15:12:33 2019 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -13,12 +13,12 @@
        table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
        h1      { text-align: center }
 </style>
-<title>mro</title>
+<title>pushmac</title>
 
 </head>
 <body>
 
-<h1 align="center">mro</h1>
+<h1 align="center">pushmac</h1>
 
 <a href="#NAME">NAME</a><br>
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
@@ -40,8 +40,8 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">mro &minus; a
-stack-based macro processor that can form macros based on
+<p style="margin-left:11%; margin-top: 1em">pushmac &minus;
+a stack-based macro processor that can form macros based on
 results returned by scheme functions</p>
 
 <h2>SYNOPSIS
@@ -49,18 +49,19 @@ results returned by scheme functions</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>mro</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>pushmac</b></p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>mro</b> is a
-stack-based macro processor. It reads from standard input,
-evaluates the macros provided to standard input, and writes
-the processed text to standard output. The macros can be
-constructed by evaluating Guile Scheme code. The macro
+<p style="margin-left:11%; margin-top: 1em"><b>pushmac</b>
+is a stack-based macro processor. It reads from standard
+input, evaluates the macros provided to standard input, and
+writes the processed text to standard output. The macros can
+be constructed by evaluating Guile Scheme code. The macro
 language is parsed by reading one character at a time from
 left to right in a single pass.</p>
 
@@ -70,7 +71,7 @@ bottom of the stack, characters typed in are echoed to
 standard output until a command is reached. You can move up
 a level in the stack by using the PUSH command (by default:
 #). Text you enter at higher levels of the stack will not be
-put to standard output but can be accessed by <b>mro</b>
+put to standard output but can be accessed by <b>pushmac</b>
 commands.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Macro
@@ -83,7 +84,7 @@ that text is code, a website, or writing.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">The following
-are the <b>mro</b> commands</p>
+are the <b>pushmac</b> commands</p>
 
 <table width="100%" border="0" rules="none" frame="void"
        cellspacing="0" cellpadding="0">
@@ -204,20 +205,20 @@ characters.</p> </td></tr>
 
 
 <p style="margin-left:11%; margin-top: 1em">The following
-Guile functions are built into <b>mro <br>
+Guile functions are built into <b>pushmac <br>
 (source filename)</b></p>
 
 <p style="margin-left:22%;">treats the file as if it were
 actually written to standard input. In other words,
-<b>mro</b> <br>
+<b>pushmac</b> <br>
 parses the contents of the file. To include the file without
 parsing it, use <b>#cat filename|.</b></p>
 
 <p style="margin-left:11%;"><b>(add_to_dnp char)</b></p>
 
 <p style="margin-left:22%;">adds the character to the
-&quot;do not print list&quot;. <b>mro</b> will ignore this
-character while parsing.</p>
+&quot;do not print list&quot;. <b>pushmac</b> will ignore
+this character while parsing.</p>
 
 <p style="margin-left:11%;"><b>(printall)</b></p>
 
@@ -231,7 +232,7 @@ character while parsing.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>Section
 counter</b> <br>
-The <b>mro</b> commands in</p>
+The <b>pushmac</b> commands in</p>
 
 <p style="margin-left:22%;">#i=1@ <br>
 #sec=&lsquo;Section #i~#i##(+ #i~ 1);@&rsquo;@ <br>
@@ -244,11 +245,11 @@ The <b>mro</b> commands in</p>
 Section 2</p>
 
 <p style="margin-left:11%;"><b>Boilerplate Guile Code in
-mro itself</b></p>
+pushmac itself</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Guile functions
-in C have to be registered. <b>mro</b> makes this process
-easy to generate. It uses these macros in its own
+in C have to be registered. <b>pushmac</b> makes this
+process easy to generate. It uses these macros in its own
 source.</p>
 
 <p style="margin-left:22%;">#register= <br>
@@ -287,7 +288,7 @@ with Guile&rsquo;s <b>scm_with_guile</b> function.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">Please report
-as an issue to https://github.com/flynnzac/mro</p>
+as an issue to https://github.com/flynnzac/pushmac</p>
 
 <h2>AUTHOR
 <a name="AUTHOR"></a>

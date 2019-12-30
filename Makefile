@@ -14,8 +14,8 @@ expand = 36
 guile_include = /usr/include/guile/2.2
 guile_lib = guile-2.2
 
-mro: mro.expand.c expand
-	cc -I $(guile_include) mro.expand.c -l$(guile_lib) -o mro \
+pushmac: pushmac.expand.c 
+	cc -I $(guile_include) pushmac.expand.c -l$(guile_lib) -o pushmac \
 	-DPAGE_MACRO=$(page_macro) \
 	-DPAGE_BUFFER=$(page_buffer) \
 	-DPAGE_STACK=$(page_stack)  \
@@ -24,15 +24,15 @@ mro: mro.expand.c expand
 	-DPUSH=$(push) -DPUSH2=$(push2) \
 	-DREF=$(ref) -DCODE=$(code) -DEXPAND=$(expand)  -Wall
 
-expand: mro.c
-	cat mro.c | mro > mro.expand.c
+pushmac.expand.c: pushmac.c
+	cat pushmac.c | pushmac > pushmac.expand.c
 
-clean: mro
-	rm mro.expand.c
+clean: pushmac
+	rm pushmac.expand.c
 
-doc: mro.mro.1
-	cat mro.mro.1 | mro > mro.1
-	groff -mandoc -Thtml mro.1 > README.md
+doc: pushmac.pushmac.1
+	cat pushmac.pushmac.1 | pushmac > pushmac.1
+	groff -mandoc -Thtml pushmac.1 > README.md
 
-install: mro
-	cp mro /usr/local/bin/
+install: pushmac
+	cp pushmac /usr/local/bin/

@@ -1,45 +1,39 @@
-%
-%
-.TH mro 1 2019-03-03 
+#pushmac=
+.B pushmac
+@%
+#version=0.0.1@%
+.TH pushmac 1 2019-03-03 
 .SH NAME
-mro \- a stack-based macro processor that can form macros based on results returned by scheme functions
-.SH SYNOPSIS 
-.B mro
-
-.SH DESCRIPTION 
-.B mro
-is a stack-based macro processor.  It reads from standard input, evaluates the macros provided to standard input, and writes the processed text to standard output.  The macros can be constructed by evaluating Guile Scheme code.  The macro language is parsed by reading one character at a time from left to right in a single pass.
+pushmac \- a stack-based macro processor that can form macros based on results returned by scheme functions
+.SH SYNOPSIS #pushmac~
+.SH DESCRIPTION #pushmac~is a stack-based macro processor.  It reads from standard input, evaluates the macros provided to standard input, and writes the processed text to standard output.  The macros can be constructed by evaluating Guile Scheme code.  The macro language is parsed by reading one character at a time from left to right in a single pass.
 
 .LP
-The macro language is centered around a stack.  When you are on the bottom of the stack, characters typed in are echoed to standard output until a command is reached.  You can move up a level in the stack by using the PUSH command (by default: #).  Text you enter at higher levels of the stack will not be put to standard output but can be accessed by 
-.B mro
-commands.
+The macro language is centered around a stack.  When you are on the bottom of the stack, characters typed in are echoed to standard output until a command is reached.  You can move up a level in the stack by using the PUSH command (by default: `#').  Text you enter at higher levels of the stack will not be put to standard output but can be accessed by #pushmac~commands.
 
 .LP
 Macro processing languages are used for text generation whether that text is code, a website, or writing.
 
 .SH COMMANDS
 
-The following are the 
-.B mro
-commands
+The following are the #pushmac~commands
 .TP
-.BR #
+.BR `#'
 PUSH command.  All text written after the command is the next level up on the stack.
 .TP
-.BR @
+.BR `@'
 DEFINE command.  Pops the text off the top two levels of the stack and assigns the text at the top of the text to the macro name at the second level from the top.
 .TP
-.BR ~
+.BR `~'
 REFERENCE command.  Pops the text from the top of the stack, looks up the name of the macro specified there, and puts that text's value to the next level down in the stack.
 .TP
-.BR $
+.BR `$'
 EXPAND command.  Expands the macros in the text on the top level of the stack.
 .TP
-.BR |
+.BR `|'
 SHELL command.  Evalutes the text on the top level of the stack as a shell command, and outputs the output of the command to the next level down on the stack.
 .TP
-.BR !
+.BR `!'
 CODE command.  Evaluates the text on the top level of the stack as Guile Scheme code, converts the result to a string using Guile's
 
 .B display
@@ -48,26 +42,20 @@ function, and puts the text to the next buffer down in the stack.
 .BR '='
 PUSH2 command. 
 .TP
-.BR `text'
+.BR ``text''
 QUOTE text.  Put the literal text to the current level of the stack.  This is how you escape the command characters.
 
 .SH "GUILE FUNCTIONS"
 .LP
-The following Guile functions are built into 
-.B mro
-.
+The following Guile functions are built into #pushmac~.
 
 .TP
 .BR "(source filename)"
-treats the file as if it were actually written to standard input.  In other words, 
-.B mro
- parses the contents of the file.  To include the file without parsing it, use
-.B "#cat filename|."
+treats the file as if it were actually written to standard input.  In other words, #pushmac~ parses the contents of the file.  To include the file without parsing it, use
+.B "`#cat filename|'."
 .TP
 .BR "(add_to_dnp char)"
-adds the character to the "do not print list". 
-.B mro
-will ignore this character while parsing.
+adds the character to the "do not print list". #pushmac~will ignore this character while parsing.
 .TP
 .BR "(printall)"
 removes all characters from the "do not print list".
@@ -75,17 +63,15 @@ removes all characters from the "do not print list".
 .LP
 .BR "Section counter"
 .br
-The 
-.B mro
-commands in
+The #pushmac~commands in
 .RS
-#i=1@
+`#i=1@
 .br
-#sec=`Section #i~#i##(+ #i~ 1);@'@
-.br
-##sec~$
+#sec=`Section #i~#i##(+ #i~ 1);@''`@
 .br
 ##sec~$
+.br
+##sec~$'
 .RE
 are expanded to
 .RS
@@ -93,13 +79,11 @@ Section 1
 .br
 Section 2
 .RE
-.BR "Boilerplate Guile Code in mro itself"
+.BR "Boilerplate Guile Code in pushmac itself"
 
-Guile functions in C have to be registered. 
-.B mro
-makes this process easy to generate.  It uses these macros in its own source.
+Guile functions in C have to be registered. #pushmac~makes this process easy to generate.  It uses these macros in its own source.
 .RS
-  #register=
+  `#register=
 .br
   void*
 .br
@@ -113,27 +97,27 @@ makes this process easy to generate.  It uses these macros in its own source.
 .br
   SCM
 .br
-  guile_#name~'@
+  guile_#name~''`@
 .br  
   #regbuild=`#register~
 .br  
 .br
   return NULL;
 .br  
-  }'@
+  }''`@'
 .RE
 
 Then, we can create guile functions like:
 .RS
-    #name=source@
+    `#name=source@
 .br
     #argnum=1@
 .br    
-    ##gfunc~$ (SCM file) { ... }
+    ##gfunc~$ (SCM file) { ... }'
 .RE
 
 And then type
-.B "##regbuild~$"
+.B "`##regbuild~$'"
 to output the
 .B register_guile_functions
 function that can be used with Guile's
@@ -142,7 +126,7 @@ function.
 .SH "SEE ALSO"
 .SH BUGS
 .TP
-Please report as an issue to https://github.com/flynnzac/mro
+Please report as an issue to https://github.com/flynnzac/pushmac
 .SH AUTHOR
 Zach Flynn <zlflynn@gmail.com>
-0.0.1
+#version~
