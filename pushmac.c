@@ -25,6 +25,7 @@
 
 /* parser state */
 static int inquote = 0;
+static int ignore = 0;
 
 /* buffer stack */
 struct buffer { char* text; int location; int size; };
@@ -41,13 +42,6 @@ static struct macro_stack m;
 /* characters not to print */
 static char* dnp;
 static int n_dnp = 0;
-
-/* do not print functions/macros */
-#add_to_dnp=`
-dnp = realloc(dnp, sizeof(char)*(n_dnp+1));
-dnp[n_dnp] = #c~;
-n_dnp++;'
-@;
 
 int
 check_dnp (int c)
@@ -108,7 +102,7 @@ copy_from_buffer (struct buffer* src)
 void
 output (int c)
 {
-  if (check_dnp(c))
+  if (stack.level == 0 && check_dnp(c))
     return;
   
   if (stack.level == 0)
@@ -225,6 +219,55 @@ ask_question ()
 
 }
 
+/* append characters from buffer input to an array input, parsing
+   escape seq, returns ending position */
+int
+escape_and_add_chars (struct buffer* buf, char** array, int pos)
+{
+  *array = realloc(*array, sizeof(char)*(pos+buf->location));
+  int isslash = 0;
+  int j = pos;
+  for (int i=0; i < buf->location; i++)
+    {
+      if (isslash)
+	{
+	  switch (buf->text[i])
+	    {
+	    case '\\':
+	      (*array)[j] = '\\';
+	      break;
+	    case 'n':
+	      (*array)[j] = '\n';
+	      break;
+	    case 't':
+	      (*array)[j] = '\t';
+	      break;
+	    case 'r':
+	      (*array)[j] = '\r';
+	      break;
+	    default:
+	      (*array)[j] = '\\';
+	      j++;
+	      (*array)[j] = buf->text[i];
+	      break;
+	    }
+	  j++;
+	}
+      else
+	{
+	  if (buf->text[i] == '\\')
+	    isslash = 1;
+	  else
+	    {
+	      (*array)[j] = buf->text[i];
+	      j++;
+	    }
+	}
+    }
+  return j;
+}
+
+
 #default=output(c);@
 #cmd=`if (stack.level >= #stack_reqd~) { #logic~ } else { #default~ } break;'@
 #buf=buf@
@@ -244,6 +287,10 @@ expand_macros (FILE* f)
       if (inquote)
         {
           if (c == '\'') inquote = 0; else #default~;
+	}
+      else if (ignore)
+	{
+	  if (c == '\n') ignore = 0;
 	}
       else
         {
@@ -324,9 +371,35 @@ expand_macros (FILE* f)
 	      #stack_reqd=3@
 	      #logic=ask_question();@
 	      ##cmd~$;
+	    case IGNORE:
+	      #stack_reqd=1@
+	      #logic=
+	      ##popbuf~$;@;
+	      ##cmd~$;
+	      break;
+	    case SILENCE:
+	      #stack_reqd=1@
+	      #logic=
+	      ##popbuf~$;
+	      n_dnp = escape_and_add_chars(buf, &dnp, n_dnp);
+	      dnp = realloc(dnp, sizeof(char)*n_dnp);
+	      @;
+	      ##cmd~$;
+	      break;
+	    case SPEAK:
+	      #stack_reqd=1@
+	      #logic=
+	      ##popbuf~$;
+	      free(dnp);
+	      dnp = malloc(sizeof(char));
+	      dnp[0] = '\0';
+	      n_dnp = 1;
+	      @;
+	      ##cmd~$;
+	      break;
             case '``'':
-              inquote = 1;
-              break;
+	      inquote = 1;
+	      break;
             default:
               #default~
               break;
@@ -348,42 +421,6 @@ register_guile_functions (void* data)
 
 								  return NULL;
 }'@;
-
-/* guile: add to do not print list */
-
-#name=add_to_dnp@
-#argnum=1@
-##gfunc~$ (SCM ch)
-{
-  char* str = scm_to_locale_string(ch);
-  #c=str[0]@ ##add_to_dnp~$
-  free(str);
-  return scm_from_locale_string("");
-}
-
-/* guile: clear do not print list */
-
-#name=printall@
-#argnum=0@
-##gfunc~$ ()
-{
-  dnp = realloc(dnp, sizeof(char));
-  dnp[0] = '\0';
-  n_dnp = 1;
-
-  return scm_from_locale_string("");
-}
-
-/* guile: start a definition section by adding \n to do not print
-   list */
-
-#name=defsec@
-#argnum=0@
-##gfunc~$ ()
-{
-  #c='\n'@ ##add_to_dnp~$
-  return scm_from_locale_string("");
-}
 
 /* guile: source a macro file as if it was entered along with text */
 #name=source@

@@ -25,6 +25,7 @@
 
 /* parser state */
 static int inquote = 0;
+static int ignore = 0;
 
 /* buffer stack */
 struct buffer { char* text; int location; int size; };
@@ -41,9 +42,6 @@ static struct macro_stack m;
 /* characters not to print */
 static char* dnp;
 static int n_dnp = 0;
-
-/* do not print functions/macros */
-;
 
 int
 check_dnp (int c)
@@ -104,7 +102,7 @@ copy_from_buffer (struct buffer* src)
 void
 output (int c)
 {
-  if (check_dnp(c))
+  if (stack.level == 0 && check_dnp(c))
     return;
   
   if (stack.level == 0)
@@ -201,6 +199,7 @@ push_macro ()
   
 }
 
+/* look at top three buffers. if third buffer is "yes", print second buffer. otherwise, print top buffer. */
 void
 ask_question ()
 {
@@ -219,6 +218,55 @@ ask_question ()
 
 
 }
+
+/* append characters from buffer input to an array input, parsing
+   escape seq, returns ending position */
+int
+escape_and_add_chars (struct buffer* buf, char** array, int pos)
+{
+  *array = realloc(*array, sizeof(char)*(pos+buf->location));
+  int isslash = 0;
+  int j = pos;
+  for (int i=0; i < buf->location; i++)
+    {
+      if (isslash)
+	{
+	  switch (buf->text[i])
+	    {
+	    case '\\':
+	      (*array)[j] = '\\';
+	      break;
+	    case 'n':
+	      (*array)[j] = '\n';
+	      break;
+	    case 't':
+	      (*array)[j] = '\t';
+	      break;
+	    case 'r':
+	      (*array)[j] = '\r';
+	      break;
+	    default:
+	      (*array)[j] = '\\';
+	      j++;
+	      (*array)[j] = buf->text[i];
+	      break;
+	    }
+	  j++;
+	}
+      else
+	{
+	  if (buf->text[i] == '\\')
+	    isslash = 1;
+	  else
+	    {
+	      (*array)[j] = buf->text[i];
+	      j++;
+	    }
+	}
+    }
+  return j;
+}
+
 
 
 
@@ -239,6 +287,10 @@ expand_macros (FILE* f)
       if (inquote)
         {
           if (c == '\'') inquote = 0; else output(c);;
+	}
+      else if (ignore)
+	{
+	  if (c == '\n') ignore = 0;
 	}
       else
         {
@@ -319,9 +371,35 @@ expand_macros (FILE* f)
 	      
 	      
 	      if (stack.level >= 3) { ask_question(); } else { output(c); } break;;
+	    case IGNORE:
+	      
+	      ;
+	      if (stack.level >= 1) { 
+	      buf=pop_buffer_stack(); null_terminate(buf);; } else { output(c); } break;;
+	      break;
+	    case SILENCE:
+	      
+	      ;
+	      if (stack.level >= 1) { 
+	      buf=pop_buffer_stack(); null_terminate(buf);;
+	      n_dnp = escape_and_add_chars(buf, &dnp, n_dnp);
+	      dnp = realloc(dnp, sizeof(char)*n_dnp);
+	       } else { output(c); } break;;
+	      break;
+	    case SPEAK:
+	      
+	      ;
+	      if (stack.level >= 1) { 
+	      buf=pop_buffer_stack(); null_terminate(buf);;
+	      free(dnp);
+	      dnp = malloc(sizeof(char));
+	      dnp[0] = '\0';
+	      n_dnp = 1;
+	       } else { output(c); } break;;
+	      break;
             case '`':
-              inquote = 1;
-              break;
+	      inquote = 1;
+	      break;
             default:
               output(c);
               break;
@@ -334,56 +412,6 @@ expand_macros (FILE* f)
 
     
 								  ;
-
-/* guile: add to do not print list */
-
-
-
-
-								  SCM
-								  guile_add_to_dnp (SCM ch)
-{
-  char* str = scm_to_locale_string(ch);
-   
-dnp = realloc(dnp, sizeof(char)*(n_dnp+1));
-dnp[n_dnp] = str[0];
-n_dnp++;
-
-  free(str);
-  return scm_from_locale_string("");
-}
-
-/* guile: clear do not print list */
-
-
-
-
-								  SCM
-								  guile_printall ()
-{
-  dnp = realloc(dnp, sizeof(char));
-  dnp[0] = '\0';
-  n_dnp = 1;
-
-  return scm_from_locale_string("");
-}
-
-/* guile: start a definition section by adding \n to do not print
-   list */
-
-
-
-
-								  SCM
-								  guile_defsec ()
-{
-   
-dnp = realloc(dnp, sizeof(char)*(n_dnp+1));
-dnp[n_dnp] = '\n';
-n_dnp++;
-
-  return scm_from_locale_string("");
-}
 
 /* guile: source a macro file as if it was entered along with text */
 
@@ -404,9 +432,6 @@ n_dnp++;
 void*
 register_guile_functions (void* data)
 {
-    scm_c_define_gsubr("add_to_dnp", 1, 0, 0, &guile_add_to_dnp);
-    scm_c_define_gsubr("printall", 0, 0, 0, &guile_printall);
-    scm_c_define_gsubr("defsec", 0, 0, 0, &guile_defsec);
     scm_c_define_gsubr("source", 1, 0, 0, &guile_source);
 
 								  return NULL;

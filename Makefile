@@ -5,13 +5,14 @@ page_macro=100
 define="'@'"
 code="'!'"
 shell="'|'"
-comment_start="'%'"
-comment_end="'\\n'"
+ignore="'%'"
 push = "'\#'"
 push2 = "'='"
 ref = "'~'"
 question = "'?'"
+silence="'^'"
 expand = 36
+speak="'*'"
 guile_include = /usr/include/guile/2.2
 guile_lib = guile-2.2
 
@@ -24,7 +25,9 @@ pushmac: pushmac.expand.c
 	-DDEFINE=$(define)  \
 	-DPUSH=$(push) -DPUSH2=$(push2) \
 	-DREF=$(ref) -DCODE=$(code) -DEXPAND=$(expand) \
-	-DQUESTION=$(question)  -Wall
+	-DQUESTION=$(question) -DIGNORE=$(ignore) \
+	-DSILENCE=$(silence) -DSPEAK=$(speak) \
+	-Wall
 
 pushmac.expand.c: pushmac.c
 	cat pushmac.c | pushmac > pushmac.expand.c
