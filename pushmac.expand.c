@@ -48,9 +48,7 @@ static int n_dnp = 0;
 int
 check_dnp (int c)
 {
-  int i;
-
-  for (i=1; i < n_dnp; i++)
+  for (int i=1; i < n_dnp; i++)
     if (dnp[i]==c)
       return 1;
 
@@ -93,11 +91,9 @@ init_buffer (struct buffer* b)
 char*
 copy_from_buffer (struct buffer* src)
 {
-  int i;
-  char* dest;
-  dest = malloc(sizeof(char)*(src->location+1));
+  char* dest = malloc(sizeof(char)*(src->location+1));
   
-  for (i=0; i < src->location; i++)
+  for (int i=0; i < src->location; i++)
     dest[i] = src->text[i];
 
   dest[src->location] = '\0';
@@ -205,6 +201,25 @@ push_macro ()
   
 }
 
+void
+ask_question ()
+{
+  struct buffer* answer, *yesreply, *noreply;
+
+   noreply=pop_buffer_stack(); null_terminate(noreply);;
+   yesreply=pop_buffer_stack(); null_terminate(yesreply);;
+   answer=pop_buffer_stack(); null_terminate(answer);;
+
+  if (strcmp(answer->text,"yes") == 0)
+    for (int i=0; i < yesreply->location; i++)
+      output(yesreply->text[i]);
+  else
+    for (int i=0; i < noreply->location; i++)
+      output(noreply->text[i]);
+
+
+}
+
 
 
 
@@ -300,6 +315,10 @@ expand_macros (FILE* f)
               while (((c=fgetc(f2)) != EOF) && c != '\0')
 		output(c);
               pclose(f2); } else { output(c); } break;;
+	    case QUESTION:
+	      
+	      
+	      if (stack.level >= 3) { ask_question(); } else { output(c); } break;;
             case '`':
               inquote = 1;
               break;
@@ -314,15 +333,15 @@ expand_macros (FILE* f)
 /* define macros to add guile functions */
 
     
-      ;
+								  ;
 
 /* guile: add to do not print list */
 
 
 
 
-    SCM
-      guile_add_to_dnp (SCM ch)
+								  SCM
+								  guile_add_to_dnp (SCM ch)
 {
   char* str = scm_to_locale_string(ch);
    
@@ -339,8 +358,8 @@ n_dnp++;
 
 
 
-    SCM
-      guile_printall ()
+								  SCM
+								  guile_printall ()
 {
   dnp = realloc(dnp, sizeof(char));
   dnp[0] = '\0';
@@ -355,8 +374,8 @@ n_dnp++;
 
 
 
-    SCM
-      guile_defsec ()
+								  SCM
+								  guile_defsec ()
 {
    
 dnp = realloc(dnp, sizeof(char)*(n_dnp+1));
@@ -370,8 +389,8 @@ n_dnp++;
 
 
 
-    SCM
-      guile_source (SCM file)
+								  SCM
+								  guile_source (SCM file)
 {
   char* file_c = scm_to_locale_string(file);
   FILE* f = fopen(file_c, "r");
@@ -390,7 +409,7 @@ register_guile_functions (void* data)
     scm_c_define_gsubr("defsec", 0, 0, 0, &guile_defsec);
     scm_c_define_gsubr("source", 1, 0, 0, &guile_source);
 
-      return NULL;
+								  return NULL;
 }
 
 /* main program */

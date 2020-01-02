@@ -52,9 +52,7 @@ n_dnp++;'
 int
 check_dnp (int c)
 {
-  int i;
-
-  for (i=1; i < n_dnp; i++)
+  for (int i=1; i < n_dnp; i++)
     if (dnp[i]==c)
       return 1;
 
@@ -97,11 +95,9 @@ init_buffer (struct buffer* b)
 char*
 copy_from_buffer (struct buffer* src)
 {
-  int i;
-  char* dest;
-  dest = malloc(sizeof(char)*(src->location+1));
+  char* dest = malloc(sizeof(char)*(src->location+1));
   
-  for (i=0; i < src->location; i++)
+  for (int i=0; i < src->location; i++)
     dest[i] = src->text[i];
 
   dest[src->location] = '\0';
@@ -209,6 +205,25 @@ push_macro ()
   
 }
 
+void
+ask_question ()
+{
+  struct buffer* answer, *yesreply, *noreply;
+
+  #buf=noreply@ ##popbuf~$;
+  #buf=yesreply@ ##popbuf~$;
+  #buf=answer@ ##popbuf~$;
+
+  if (strcmp(answer->text,"yes") == 0)
+    for (int i=0; i < yesreply->location; i++)
+      output(yesreply->text[i]);
+  else
+    for (int i=0; i < noreply->location; i++)
+      output(noreply->text[i]);
+
+
+}
+
 #default=output(c);@
 #cmd=`if (stack.level >= #stack_reqd~) { #logic~ } else { #default~ } break;'@
 #buf=buf@
@@ -304,6 +319,10 @@ expand_macros (FILE* f)
 		output(c);
               pclose(f2);@;
               ##cmd~$;
+	    case QUESTION:
+	      #stack_reqd=3@
+	      #logic=ask_question();@
+	      ##cmd~$;
             case '``'':
               inquote = 1;
               break;
@@ -322,11 +341,11 @@ register_guile_functions (void* data)
 {@
     #gfunc=`#register##register~
     scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~);@
-    SCM
-      guile_#name~'@
-      #regbuild=`#register~
+								  SCM
+								  guile_#name~'@
+								  #regbuild=`#register~
 
-      return NULL;
+								  return NULL;
 }'@;
 
 /* guile: add to do not print list */

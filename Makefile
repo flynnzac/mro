@@ -10,6 +10,7 @@ comment_end="'\\n'"
 push = "'\#'"
 push2 = "'='"
 ref = "'~'"
+question = "'?'"
 expand = 36
 guile_include = /usr/include/guile/2.2
 guile_lib = guile-2.2
@@ -22,7 +23,8 @@ pushmac: pushmac.expand.c
 	-DSHELL=$(shell) \
 	-DDEFINE=$(define)  \
 	-DPUSH=$(push) -DPUSH2=$(push2) \
-	-DREF=$(ref) -DCODE=$(code) -DEXPAND=$(expand)  -Wall
+	-DREF=$(ref) -DCODE=$(code) -DEXPAND=$(expand) \
+	-DQUESTION=$(question)  -Wall
 
 pushmac.expand.c: pushmac.c
 	cat pushmac.c | pushmac > pushmac.expand.c
