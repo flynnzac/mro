@@ -205,6 +205,7 @@ push_macro ()
   
 }
 
+/* look at top three buffers. if third buffer is "yes", print second buffer. otherwise, print top buffer. */
 void
 ask_question ()
 {
