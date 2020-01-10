@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.4 -->
-<!-- CreationDate: Fri Jan 10 11:55:29 2020 -->
+<!-- CreationDate: Fri Jan 10 11:59:24 2020 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -180,18 +180,21 @@ characters.</p> </td></tr>
 
 
 <p style="margin-left:11%; margin-top: 1em"><b>Section
-counter</b> <br>
-The <b>pushmac</b> commands in</p>
+header</b></p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>pushmac</b>
+commands could be used to create a section header in a
+standard way, like so:</p>
 
 <p style="margin-left:22%;">#i=1@ <br>
-#sec=&lsquo;Section #i~#i##(+ #i~ 1);@&rsquo;@ <br>
-##sec~$ <br>
-##sec~$</p>
+#title=The Beginning@ <br>
+#sec=&lsquo;Section #i~: #title~@</p>
 
-<p style="margin-left:11%;">are expanded to</p>
+<p style="margin-left:11%; margin-top: 1em">are expanded
+to</p>
 
-<p style="margin-left:22%;">Section 1 <br>
-Section 2</p>
+<p style="margin-left:22%;">Section 1: The Beginning <br>
+Section 2: After the Beginning</p>
 
 <p style="margin-left:11%;"><b>Boilerplate Guile
 Code</b></p>

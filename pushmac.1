@@ -47,25 +47,31 @@ QUOTE text.  Put the literal text to the current level of the stack.  This is ho
 
 .SH EXAMPLES
 .LP
-.BR "Section counter"
+.BR "Section header"
 .br
-The 
+
 .B pushmac
-commands in
+commands could be used to create a section header in a standard way, like so:
 .RS
 #i=1@
 .br
-#sec=`Section #i~#i##(+ #i~ 1);@'@
+#title=The Beginning@
 .br
-##sec~$
+#sec=`Section #i~: #title~@
 .br
-##sec~$
+
+.br
+
+.br
+
+.br
+'
 .RE
 are expanded to
 .RS
-Section 1
+Section 1: The Beginning
 .br
-Section 2
+Section 2: After the Beginning
 .RE
 .BR "Boilerplate Guile Code"
 
