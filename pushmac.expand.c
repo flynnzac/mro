@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <libguile.h>
 ;
 
 /* parser state */
@@ -278,8 +277,6 @@ expand_macros (FILE* f)
 {
   int i,c,loc;
   struct buffer* buf;
-  char* guile_str;
-  SCM guile_ret;
   FILE* f2;
 
   while (((c = fgetc(f)) != EOF) && c != '\0')
@@ -332,24 +329,6 @@ expand_macros (FILE* f)
                 for (i=0; i < strlen(m.table[loc].value); i++)
                   output(m.table[loc].value[i]);
                } else { output(c); } break;;
-            case CODE:
-              
-              ;
-	      
-              if (stack.level >= 1) { 
-              buf=pop_buffer_stack(); null_terminate(buf);;
-              guile_ret = scm_c_eval_string(buf->text);
-              if (!scm_is_eq(guile_ret, SCM_UNSPECIFIED))
-                {
-                  guile_str = scm_to_locale_string
-                    (scm_object_to_string
-                     (guile_ret,
-                      scm_c_eval_string("display")));
-                  for (i=0; i < strlen(guile_str); i++)
-                    output(guile_str[i]);
-            
-                  free(guile_str);
-                } } else { output(c); } break;;
             case EXPAND:
               
               ;
@@ -381,21 +360,7 @@ expand_macros (FILE* f)
 	      
 	      ;
 	      if (stack.level >= 1) { 
-	      buf=pop_buffer_stack(); null_terminate(buf);;
-	      n_dnp = escape_and_add_chars(buf, &dnp, n_dnp);
-	      dnp = realloc(dnp, sizeof(char)*n_dnp);
-	       } else { output(c); } break;;
-	      break;
-	    case SPEAK:
-	      
-	      ;
-	      if (stack.level >= 1) { 
-	      buf=pop_buffer_stack(); null_terminate(buf);;
-	      free(dnp);
-	      dnp = malloc(sizeof(char));
-	      dnp[0] = '\0';
-	      n_dnp = 1;
-	       } else { output(c); } break;;
+	      buf=pop_buffer_stack(); null_terminate(buf);; } else { output(c); } break;;
 	      break;
             case '`':
 	      inquote = 1;
@@ -406,35 +371,6 @@ expand_macros (FILE* f)
             }
         }
     }
-}
-
-/* define macros to add guile functions */
-
-    
-								  ;
-
-/* guile: source a macro file as if it was entered along with text */
-
-
-
-								  SCM
-								  guile_source (SCM file)
-{
-  char* file_c = scm_to_locale_string(file);
-  FILE* f = fopen(file_c, "r");
-  expand_macros(f);
-  fclose(f);
-  free(file_c);
-  return scm_from_locale_string("");
-}
-
-
-void*
-register_guile_functions (void* data)
-{
-    scm_c_define_gsubr("source", 1, 0, 0, &guile_source);
-
-								  return NULL;
 }
 
 /* main program */
@@ -458,7 +394,6 @@ main (int argc, char** argv)
   dnp = malloc(sizeof(char));
   dnp[0] = '\0';
   n_dnp = 1;
-  scm_with_guile(&register_guile_functions, NULL);
 
   /* expand , , ... to the command line args */
   for (i=1; i < argc; i++)

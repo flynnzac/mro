@@ -3,7 +3,6 @@ page_stack=100
 page_macro=100
 
 define="'@'"
-code="'!'"
 shell="'|'"
 ignore="'%'"
 push = "'\#'"
@@ -12,19 +11,17 @@ ref = "'~'"
 question = "'?'"
 silence="'^'"
 expand = 36
-speak="'*'"
-guile_include = /usr/include/guile/2.2
-guile_lib = guile-2.2
+speak="'!'"
 
 pushmac: pushmac.expand.c 
-	cc -I $(guile_include) pushmac.expand.c -l$(guile_lib) -o pushmac \
+	cc pushmac.expand.c -o pushmac \
 	-DPAGE_MACRO=$(page_macro) \
 	-DPAGE_BUFFER=$(page_buffer) \
 	-DPAGE_STACK=$(page_stack)  \
 	-DSHELL=$(shell) \
 	-DDEFINE=$(define)  \
 	-DPUSH=$(push) -DPUSH2=$(push2) \
-	-DREF=$(ref) -DCODE=$(code) -DEXPAND=$(expand) \
+	-DREF=$(ref) -DEXPAND=$(expand) \
 	-DQUESTION=$(question) -DIGNORE=$(ignore) \
 	-DSILENCE=$(silence) -DSPEAK=$(speak) \
 	-Wall

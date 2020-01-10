@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <libguile.h>
 ';
 
 /* parser state */
@@ -278,8 +277,6 @@ expand_macros (FILE* f)
 {
   int i,c,loc;
   struct buffer* buf;
-  char* guile_str;
-  SCM guile_ret;
   FILE* f2;
 
   while (((c = fgetc(f)) != EOF) && c != '\0')
@@ -331,24 +328,6 @@ expand_macros (FILE* f)
                 for (i=0; i < strlen(m.table[loc].value); i++)
                   output(m.table[loc].value[i]);
               @;
-              ##cmd~$;
-            case CODE:
-              #stack_reqd=1@
-              #logic=
-              ##popbuf~$;
-              guile_ret = scm_c_eval_string(buf->text);
-              if (`!'scm_is_eq(guile_ret, SCM_UNSPECIFIED))
-                {
-                  guile_str = scm_to_locale_string
-                    (scm_object_to_string
-                     (guile_ret,
-                      scm_c_eval_string("display")));
-                  for (i=0; i < strlen(guile_str); i++)
-                    output(guile_str[i]);
-            
-                  free(guile_str);
-                }@;
-	      
               ##cmd~$;
             case EXPAND:
               #stack_reqd=1@
@@ -408,35 +387,6 @@ expand_macros (FILE* f)
     }
 }
 
-/* define macros to add guile functions */
-#register=
-void*
-register_guile_functions (void* data)
-{@
-    #gfunc=`#register##register~
-    scm_c_define_gsubr("#name~", #argnum~, 0, 0, &guile_#name~);@
-								  SCM
-								  guile_#name~'@
-								  #regbuild=`#register~
-
-								  return NULL;
-}'@;
-
-/* guile: source a macro file as if it was entered along with text */
-#name=source@
-#argnum=1@
-##gfunc~$ (SCM file)
-{
-  char* file_c = scm_to_locale_string(file);
-  FILE* f = fopen(file_c, "r");
-  expand_macros(f);
-  fclose(f);
-  free(file_c);
-  return scm_from_locale_string("");
-}
-
-##regbuild~$
-
 /* main program */
 int
 main (int argc, char** argv)
@@ -458,7 +408,6 @@ main (int argc, char** argv)
   dnp = malloc(sizeof(char));
   dnp[0] = '\0';
   n_dnp = 1;
-  scm_with_guile(&register_guile_functions, NULL);
 
   /* expand #0~, #1~, ... to the command line args */
   for (i=1; i < argc; i++)
