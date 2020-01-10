@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.4 -->
-<!-- CreationDate: Fri Jan 10 12:01:11 2020 -->
+<!-- CreationDate: Fri Jan 10 12:04:36 2020 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -186,9 +186,10 @@ header</b></p>
 commands could be used to create a section header in a
 standard way, like so:</p>
 
-<p style="margin-left:22%;">#i=1@ <br>
+<p style="margin-left:22%;">#sec=&lsquo;Section #i~:
+#title~&rsquo;@ <br>
+#i=1@ <br>
 #title=The Beginning@ <br>
-#sec=&lsquo;Section #i~: #title~&rsquo;@ <br>
 ##sec~$ <br>
 #i=2@ <br>
 #title=After the Beginning@ <br>
@@ -199,8 +200,11 @@ standard way, like so:</p>
 <p style="margin-left:22%;">Section 1: The Beginning <br>
 Section 2: After the Beginning</p>
 
-<p style="margin-left:11%;"><b>Boilerplate Guile
-Code</b></p>
+<p style="margin-left:11%;">This is useful in case you may
+want to change later how the titles are formatted.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>Boilerplate
+Guile Code</b></p>
 
 <p style="margin-left:11%; margin-top: 1em">Guile is a
 Scheme language that is easy to use to extend programs.

@@ -45,11 +45,11 @@ QUOTE text.  Put the literal text to the current level of the stack.  This is ho
 .br
 #pushmac~commands could be used to create a section header in a standard way, like so:
 .RS
+`#sec=`Section #i~: #title~''@
+.br
 `#i=1@
 .br
 #title=The Beginning@
-.br
-#sec=`Section #i~: #title~''`@
 .br
 ##sec~$
 .br
@@ -65,6 +65,8 @@ Section 1: The Beginning
 .br
 Section 2: After the Beginning
 .RE
+This is useful in case you may want to change later how the titles are formatted.
+.LP
 .BR "Boilerplate Guile Code"
 
 Guile is a Scheme language that is easy to use to extend programs. Guile functions have to be registered in the C program that wants to make use of them. #pushmac~makes this process easy to generate.  
