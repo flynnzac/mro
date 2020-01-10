@@ -6,7 +6,7 @@
 .SH NAME
 pushmac \- a stack-based macro processor that can form macros based on results returned by scheme functions
 .SH SYNOPSIS #pushmac~
-.SH DESCRIPTION #pushmac~is a stack-based macro processor.  It reads from standard input, evaluates the macros provided to standard input, and writes the processed text to standard output.  The macros can be constructed by evaluating Guile Scheme code.  The macro language is parsed by reading one character at a time from left to right in a single pass.
+.SH DESCRIPTION #pushmac~is a stack-based macro processor.  It reads from standard input, evaluates the macros provided to standard input, and writes the processed text to standard output.  The macro language is parsed by reading one character at a time from left to right in a single pass.
 
 .LP
 The macro language is centered around a stack.  When you are on the bottom of the stack, characters typed in are echoed to standard output until a command is reached.  You can move up a level in the stack by using the PUSH command (by default: `#').  Text you enter at higher levels of the stack will not be put to standard output but can be accessed by #pushmac~commands.
@@ -33,32 +33,12 @@ EXPAND command.  Expands the macros in the text on the top level of the stack.
 .BR `|'
 SHELL command.  Evalutes the text on the top level of the stack as a shell command, and outputs the output of the command to the next level down on the stack.
 .TP
-.BR `!'
-CODE command.  Evaluates the text on the top level of the stack as Guile Scheme code, converts the result to a string using Guile's
-
-.B display
-function, and puts the text to the next buffer down in the stack.
-.TP
 .BR '='
 PUSH2 command. 
 .TP
 .BR ``text''
 QUOTE text.  Put the literal text to the current level of the stack.  This is how you escape the command characters.
 
-.SH "GUILE FUNCTIONS"
-.LP
-The following Guile functions are built into #pushmac~.
-
-.TP
-.BR "(source filename)"
-treats the file as if it were actually written to standard input.  In other words, #pushmac~ parses the contents of the file.  To include the file without parsing it, use
-.B "`#cat filename|'."
-.TP
-.BR "(add_to_dnp char)"
-adds the character to the "do not print list". #pushmac~will ignore this character while parsing.
-.TP
-.BR "(printall)"
-removes all characters from the "do not print list".
 .SH EXAMPLES
 .LP
 .BR "Section counter"
@@ -79,9 +59,9 @@ Section 1
 .br
 Section 2
 .RE
-.BR "Boilerplate Guile Code in pushmac itself"
+.BR "Boilerplate Guile Code"
 
-Guile functions in C have to be registered. #pushmac~makes this process easy to generate.  It uses these macros in its own source.
+Guile is a Scheme language that is easy to use to extend programs. Guile functions have to be registered in the C program that wants to make use of them. #pushmac~makes this process easy to generate.  
 .RS
   `#register=
 .br
@@ -109,7 +89,7 @@ Guile functions in C have to be registered. #pushmac~makes this process easy to 
 
 Then, we can create guile functions like:
 .RS
-    `#name=source@
+    `#name=myfunction@
 .br
     #argnum=1@
 .br    

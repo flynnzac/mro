@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.4 -->
-<!-- CreationDate: Fri Jan 10 11:50:42 2020 -->
+<!-- CreationDate: Fri Jan 10 11:55:29 2020 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -24,7 +24,6 @@
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
 <a href="#COMMANDS">COMMANDS</a><br>
-<a href="#GUILE FUNCTIONS">GUILE FUNCTIONS</a><br>
 <a href="#EXAMPLES">EXAMPLES</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 <a href="#BUGS">BUGS</a><br>
@@ -58,8 +57,7 @@ results returned by scheme functions</p>
 <p style="margin-left:11%; margin-top: 1em"><b>pushmac</b>
 is a stack-based macro processor. It reads from standard
 input, evaluates the macros provided to standard input, and
-writes the processed text to standard output. The macros can
-be constructed by evaluating Guile Scheme code. The macro
+writes the processed text to standard output. The macro
 language is parsed by reading one character at a time from
 left to right in a single pass.</p>
 
@@ -88,11 +86,11 @@ are the <b>pushmac</b> commands</p>
        cellspacing="0" cellpadding="0">
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="1%">
+<td width="9%">
 
 
 <p><b>#</b></p></td>
-<td width="10%"></td>
+<td width="2%"></td>
 <td width="78%">
 
 
@@ -100,11 +98,11 @@ are the <b>pushmac</b> commands</p>
 next level up on the stack.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="1%">
+<td width="9%">
 
 
 <p><b>@</b></p></td>
-<td width="10%"></td>
+<td width="2%"></td>
 <td width="78%">
 
 
@@ -113,11 +111,11 @@ the stack and assigns the text at the top of the text to the
 macro name at the second level from the top.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="1%">
+<td width="9%">
 
 
 <p><b>~</b></p></td>
-<td width="10%"></td>
+<td width="2%"></td>
 <td width="78%">
 
 
@@ -127,11 +125,11 @@ puts that text&rsquo;s value to the next level down in the
 stack.</p> </td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="1%">
+<td width="9%">
 
 
 <p><b>$</b></p></td>
-<td width="10%"></td>
+<td width="2%"></td>
 <td width="78%">
 
 
@@ -139,11 +137,11 @@ stack.</p> </td></tr>
 top level of the stack.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="1%">
+<td width="9%">
 
 
 <p><b>|</b></p></td>
-<td width="10%"></td>
+<td width="2%"></td>
 <td width="78%">
 
 
@@ -152,36 +150,15 @@ stack as a shell command, and outputs the output of the
 command to the next level down on the stack.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
-<td width="1%">
-
-
-<p><b>!</b></p></td>
-<td width="10%"></td>
-<td width="78%">
-
-
-<p>CODE command. Evaluates the text on the top level of the
-stack as Guile Scheme code, converts the result to a string
-using Guile&rsquo;s</p></td></tr>
-</table>
-
-<p style="margin-left:22%; margin-top: 1em"><b>display</b>
-function, and puts the text to the next buffer down in the
-stack.</p>
-
-<table width="100%" border="0" rules="none" frame="void"
-       cellspacing="0" cellpadding="0">
-<tr valign="top" align="left">
-<td width="11%"></td>
 <td width="9%">
 
 
-<p style="margin-top: 1em"><b>&rsquo;=&rsquo;</b></p></td>
+<p><b>&rsquo;=&rsquo;</b></p></td>
 <td width="2%"></td>
 <td width="78%">
 
 
-<p style="margin-top: 1em">PUSH2 command.</p></td></tr>
+<p>PUSH2 command.</p></td></tr>
 <tr valign="top" align="left">
 <td width="11%"></td>
 <td width="9%">
@@ -196,32 +173,6 @@ stack.</p>
 the stack. This is how you escape the command
 characters.</p> </td></tr>
 </table>
-
-<h2>GUILE FUNCTIONS
-<a name="GUILE FUNCTIONS"></a>
-</h2>
-
-
-<p style="margin-left:11%; margin-top: 1em">The following
-Guile functions are built into <b>pushmac <br>
-(source filename)</b></p>
-
-<p style="margin-left:22%;">treats the file as if it were
-actually written to standard input. In other words,
-<b>pushmac</b> <br>
-parses the contents of the file. To include the file without
-parsing it, use <b>#cat filename|.</b></p>
-
-<p style="margin-left:11%;"><b>(add_to_dnp char)</b></p>
-
-<p style="margin-left:22%;">adds the character to the
-&quot;do not print list&quot;. <b>pushmac</b> will ignore
-this character while parsing.</p>
-
-<p style="margin-left:11%;"><b>(printall)</b></p>
-
-<p style="margin-left:22%;">removes all characters from the
-&quot;do not print list&quot;.</p>
 
 <h2>EXAMPLES
 <a name="EXAMPLES"></a>
@@ -242,13 +193,14 @@ The <b>pushmac</b> commands in</p>
 <p style="margin-left:22%;">Section 1 <br>
 Section 2</p>
 
-<p style="margin-left:11%;"><b>Boilerplate Guile Code in
-pushmac itself</b></p>
+<p style="margin-left:11%;"><b>Boilerplate Guile
+Code</b></p>
 
-<p style="margin-left:11%; margin-top: 1em">Guile functions
-in C have to be registered. <b>pushmac</b> makes this
-process easy to generate. It uses these macros in its own
-source.</p>
+<p style="margin-left:11%; margin-top: 1em">Guile is a
+Scheme language that is easy to use to extend programs.
+Guile functions have to be registered in the C program that
+wants to make use of them. <b>pushmac</b> makes this process
+easy to generate.</p>
 
 <p style="margin-left:22%;">#register= <br>
 void* <br>
@@ -266,7 +218,7 @@ return NULL; <br>
 <p style="margin-left:11%; margin-top: 1em">Then, we can
 create guile functions like:</p>
 
-<p style="margin-left:22%;">#name=source@ <br>
+<p style="margin-left:22%;">#name=myfunction@ <br>
 #argnum=1@ <br>
 ##gfunc~$ (SCM file) { ... }</p>
 
