@@ -223,6 +223,7 @@ ask_question ()
 int
 escape_and_add_chars (struct buffer* buf, char** array, int pos)
 {
+  /* make this UTF-8'able */
   *array = realloc(*array, sizeof(char)*(pos+buf->location));
   int isslash = 0;
   int j = pos;

@@ -16,7 +16,7 @@ Macro processing languages are used for text generation whether that text is cod
 
 .SH COMMANDS
 
-The following are the #pushmac~commands
+The following are the #pushmac~commands.  These characters will just be output as is if there are not enough "levels" in the stack.  So most of these do not need to be escaped unless the stack already has some elements on it.
 .TP
 .BR `#'
 PUSH command.  All text written after the command is the next level up on the stack.
@@ -38,7 +38,18 @@ PUSH2 command.
 .TP
 .BR ``text''
 QUOTE text.  Put the literal text to the current level of the stack.  This is how you escape the command characters.
-
+.TP
+.BR `?'
+QUESTION command. If the first element on the stack is "yes", output the second element on the stack, otherwise output the third element on the stack.
+.TP
+.BR `%'
+IGNORE command.  Ignore everything on the top of the stack (i.e. this is like a "comment" command).
+.TP
+.BR `^'
+SILENCE command. Do not print any of the characters on the top of the stack.
+.TP
+.BR `!'
+SPEAK command.  Allow the characters (that presumably have been previously silenced) to print again.
 .SH EXAMPLES
 .LP
 .BR "Section header"

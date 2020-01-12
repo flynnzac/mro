@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.4 -->
-<!-- CreationDate: Fri Jan 10 12:04:36 2020 -->
+<!-- CreationDate: Sun Jan 12 23:24:40 2020 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -37,8 +37,8 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">pushmac &minus;
-a stack-based macro processor that can form macros based on
+<p style="margin-left:11%; margin-top: 1em">pushmac - a
+stack-based macro processor that can form macros based on
 results returned by scheme functions</p>
 
 <h2>SYNOPSIS
@@ -80,7 +80,10 @@ that text is code, a website, or writing.</p>
 
 
 <p style="margin-left:11%; margin-top: 1em">The following
-are the <b>pushmac</b> commands</p>
+are the <b>pushmac</b> commands. These characters will just
+be output as is if there are not enough &quot;levels&quot;
+in the stack. So most of these do not need to be escaped
+unless the stack already has some elements on it.</p>
 
 <table width="100%" border="0" rules="none" frame="void"
        cellspacing="0" cellpadding="0">
@@ -164,7 +167,7 @@ command to the next level down on the stack.</p></td></tr>
 <td width="9%">
 
 
-<p><b>&lsquo;text&rsquo;</b></p></td>
+<p><b>&rsquo;text&rsquo;</b></p></td>
 <td width="2%"></td>
 <td width="78%">
 
@@ -172,6 +175,55 @@ command to the next level down on the stack.</p></td></tr>
 <p>QUOTE text. Put the literal text to the current level of
 the stack. This is how you escape the command
 characters.</p> </td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="9%">
+
+
+<p><b>?</b></p></td>
+<td width="2%"></td>
+<td width="78%">
+
+
+<p>QUESTION command. If the first element on the stack is
+&quot;yes&quot;, output the second element on the stack,
+otherwise output the third element on the stack.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="9%">
+
+
+<p><b>%</b></p></td>
+<td width="2%"></td>
+<td width="78%">
+
+
+<p>IGNORE command. Ignore everything on the top of the
+stack (i.e. this is like a &quot;comment&quot; command).</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="9%">
+
+
+<p><b>^</b></p></td>
+<td width="2%"></td>
+<td width="78%">
+
+
+<p>SILENCE command. Do not print any of the characters on
+the top of the stack.</p></td></tr>
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="9%">
+
+
+<p><b>!</b></p></td>
+<td width="2%"></td>
+<td width="78%">
+
+
+<p>SPEAK command. Allow the characters (that presumably
+have been previously silenced) to print again.</p></td></tr>
 </table>
 
 <h2>EXAMPLES
@@ -186,7 +238,7 @@ header</b></p>
 commands could be used to create a section header in a
 standard way, like so:</p>
 
-<p style="margin-left:22%;">#sec=&lsquo;Section #i~:
+<p style="margin-left:22%;">#sec=&rsquo;Section #i~:
 #title~&rsquo;@ <br>
 #i=1@ <br>
 #title=The Beginning@ <br>
@@ -216,12 +268,12 @@ easy to generate.</p>
 void* <br>
 register_guile_functions (void* data) <br>
 {@ <br>
-#gfunc=&lsquo;#register##register~ <br>
+#gfunc=&rsquo;#register##register~ <br>
 scm_c_define_gsubr(&quot;#name~&quot;, #argnum~, 0, 0,
 &amp;guile_#name~);@ <br>
 SCM <br>
 guile_#name~&rsquo;@ <br>
-#regbuild=&lsquo;#register~ <br>
+#regbuild=&rsquo;#register~ <br>
 return NULL; <br>
 }&rsquo;@</p>
 
