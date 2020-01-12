@@ -1,4 +1,4 @@
-SUFFIXES = .pushmac
+SUFFIXES = .pushmac 
 .pushmac.c:
 	cat $< | pushmac > $@
 
