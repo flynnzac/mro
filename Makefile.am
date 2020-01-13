@@ -1,6 +1,13 @@
-SUFFIXES = .pushmac 
-.pushmac.c:
+SUFFIXES = .pshm
+.pshm.c:
 	cat $< | pushmac > $@
 
 bin_PROGRAMS = pushmac
-pushmac_SOURCES = pushmac.c.pushmac
+
+if PUSHMAC
+pushmac_SOURCES = pushmac.pshm
+else
+pushmac_SOURCES = pushmac-bootstrap.c
+endif
+
+

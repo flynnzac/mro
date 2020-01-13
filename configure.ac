@@ -3,7 +3,11 @@
 
 AC_PREREQ([2.69])
 AC_INIT([pushmac], [0.0.1], [github.com/flynnzac/pushmac])
-AC_CONFIG_SRCDIR([pushmac.c.pushmac])
+AC_CONFIG_SRCDIR([pushmac.pshm])
+
+# Check if any version of pushmac is installed
+AC_CHECK_PROG([pushmac_avail], [pushmac], [true], [false])
+AM_CONDITIONAL([PUSHMAC], [test x$pushmac_avail = xtrue])
 
 # Defines
 AC_DEFINE([PAGE_MACRO], 100)
