@@ -1,0 +1,6 @@
+To build pushmac, do the following:
+
+$ ./init_build.sh
+$ ./configure
+$ make
+$ sudo make install
