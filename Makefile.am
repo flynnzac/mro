@@ -10,4 +10,6 @@ else
 pushmac_SOURCES = pushmac-bootstrap.c
 endif
 
+man1_MANS = pushmac.1
+
 
