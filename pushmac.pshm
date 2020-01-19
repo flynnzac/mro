@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistr.h>
 ';
 
 /* parser state */
@@ -227,11 +228,15 @@ escape_and_add_chars (struct buffer* buf, char** array, int pos)
   *array = realloc(*array, sizeof(char)*(pos+buf->location));
   int isslash = 0;
   int j = pos;
-  for (int i=0; i < buf->location; i++)
+  unsigned char* s;
+  ucs4_t c;
+  if (u8_strmbtouc(&c, s) <= 0) return 0;
+
+  for (s=buf->text; s != NULL; s=u8_next(&c, s))
     {
       if (isslash)
 	{
-	  switch (buf->text[i])
+ 	  switch (c)
 	    {
 	    case '\\':
 	      (*array)[j] = '\\';
@@ -248,19 +253,25 @@ escape_and_add_chars (struct buffer* buf, char** array, int pos)
 	    default:
 	      (*array)[j] = '\\';
 	      j++;
-	      (*array)[j] = buf->text[i];
+	      int k;
+	      for (k = 0; k < u8_strmblen(s); k++)
+		(*array)[j+k] = s[k];
+	      j += k;
 	      break;
 	    }
 	  j++;
+	  isslash = 0;
 	}
       else
 	{
-	  if (buf->text[i] == '\\')
+	  if (c == '\\')
 	    isslash = 1;
 	  else
 	    {
-	      (*array)[j] = buf->text[i];
-	      j++;
+	      int k;
+	      for (k = 0; k < u8_strmblen(s); k++)
+		(*array)[j+k] = s[k];
+	      j += k;
 	    }
 	}
     }

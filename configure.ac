@@ -9,6 +9,9 @@ AC_CONFIG_SRCDIR([pushmac.pshm])
 AC_CHECK_PROG([pushmac_avail], [pushmac], [true], [false])
 AM_CONDITIONAL([PUSHMAC], [test x$pushmac_avail = xtrue])
 
+# Check for libraries
+AC_CHECK_LIB([unistring], [u8_next])
+
 # Defines
 AC_DEFINE([PAGE_MACRO], 100)
 AC_DEFINE([PAGE_BUFFER], 10000)
